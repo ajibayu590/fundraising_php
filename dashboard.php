@@ -95,30 +95,77 @@ try {
     <?php echo get_csrf_token_meta(); ?>
     
     <style>
-        /* Critical inline CSS to prevent header overlap */
+        /* FINAL HEADER FIX - SIMPLE & EFFECTIVE */
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        header {
+            position: relative !important;
+            z-index: 99999 !important;
+            background: white !important;
+            width: 100% !important;
+        }
+        
+        .sidebar {
+            z-index: 10 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 16rem !important;
+            height: 100vh !important;
+            background: white !important;
+        }
+        
+        .main-content {
+            margin-left: 16rem !important;
+            padding: 2rem !important;
+            width: calc(100% - 16rem) !important;
+        }
+        
         @media (max-width: 768px) {
-            body { margin: 0 !important; padding: 0 !important; }
-            header { 
-                position: fixed !important; 
-                top: 0 !important; 
-                left: 0 !important; 
-                right: 0 !important; 
-                z-index: 10000 !important; 
-                background: white !important;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            header {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                z-index: 99999 !important;
             }
-            .page-wrapper { padding-top: 5rem !important; }
-            .sidebar { z-index: 100 !important; }
-            .main-content { padding-top: 1rem !important; }
+            
+            .mobile-menu-btn {
+                display: flex !important;
+                position: fixed !important;
+                top: 1rem !important;
+                left: 1rem !important;
+                z-index: 999999 !important;
+                background: white !important;
+                border-radius: 0.5rem !important;
+                padding: 0.5rem !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%) !important;
+                padding-top: 5rem !important;
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding: 1rem !important;
+                padding-top: 6rem !important;
+                width: 100% !important;
+            }
         }
         
         @media (min-width: 769px) {
-            header { 
-                position: relative !important; 
-                z-index: 10000 !important; 
-                background: white !important; 
+            .mobile-menu-btn {
+                display: none !important;
             }
-            .sidebar { z-index: 100 !important; }
         }
     </style>
 </head>
