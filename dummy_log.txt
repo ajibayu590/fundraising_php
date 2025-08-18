@@ -1,0 +1,2 @@
+2025-08-16 05:46:06 [insert_all_dummy] User: Ahmad Rizki Pratama - {"count":26}
+2025-08-16 05:56:45 [insert_all_dummy] User: Ahmad Rizki Pratama - {"count":26}
