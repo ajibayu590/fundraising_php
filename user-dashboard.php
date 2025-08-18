@@ -107,6 +107,7 @@ try {
         body {
             margin: 0 !important;
             padding: 0 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         
         header {
@@ -122,12 +123,15 @@ try {
         .main-content {
             margin-top: 64px !important;
             padding: 1rem !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
         
         @media (min-width: 768px) {
             .main-content {
                 margin-left: 250px !important;
                 margin-top: 64px !important;
+                width: calc(100% - 250px) !important;
             }
         }
         
@@ -140,15 +144,17 @@ try {
             transform-origin: 50% 50%;
         }
         
-        /* Responsive fixes */
+        /* Mobile responsive fixes */
         @media (max-width: 640px) {
             .main-content {
                 margin-left: 0 !important;
                 padding: 0.5rem !important;
+                width: 100% !important;
             }
             
             .grid {
                 grid-template-columns: 1fr !important;
+                gap: 1rem !important;
             }
             
             .overflow-x-auto {
@@ -158,9 +164,26 @@ try {
             table {
                 min-width: 600px !important;
             }
+            
+            .bg-white {
+                padding: 1rem !important;
+            }
+            
+            .text-2xl {
+                font-size: 1.5rem !important;
+            }
+            
+            .text-xl {
+                font-size: 1.25rem !important;
+            }
         }
         
         @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+            
             .sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
@@ -168,6 +191,33 @@ try {
             
             .sidebar.open {
                 transform: translateX(0);
+            }
+            
+            .grid {
+                gap: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .lg\\:grid-cols-2 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        /* Ensure all elements are responsive */
+        * {
+            box-sizing: border-box !important;
+        }
+        
+        .container {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 1rem !important;
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 0 0.5rem !important;
             }
         }
     </style>
@@ -202,9 +252,9 @@ try {
         <?php endif; ?>
         
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <!-- Target Progress -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Target Hari Ini</p>
@@ -224,7 +274,7 @@ try {
             </div>
             
             <!-- Kunjungan Hari Ini -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-blue-100 rounded-lg">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +290,7 @@ try {
             </div>
             
             <!-- Donasi Berhasil -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-green-100 rounded-lg">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,7 +305,7 @@ try {
             </div>
             
             <!-- Total Donasi Hari Ini -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-yellow-100 rounded-lg">
                         <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -271,9 +321,9 @@ try {
         </div>
         
         <!-- Monthly Summary -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
             <!-- Monthly Stats -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Bulan Ini</h3>
                 <div class="space-y-4">
                     <div class="flex justify-between items-center">
@@ -300,7 +350,7 @@ try {
             </div>
             
             <!-- Weekly Chart -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-4 md:p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Performa 7 Hari Terakhir</h3>
                 <canvas id="weeklyChart" width="400" height="200"></canvas>
             </div>

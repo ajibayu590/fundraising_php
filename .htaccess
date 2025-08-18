@@ -33,7 +33,7 @@ RewriteEngine On
 RewriteRule ^api/(.*)$ api/$1 [L]
 
 # Handle 404 errors
-ErrorDocument 404 /404.php
+ErrorDocument 404 /admin-access-denied.php
 
 # PHP settings
 <IfModule mod_php.c>

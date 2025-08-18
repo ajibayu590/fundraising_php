@@ -7,6 +7,12 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Check if user has admin/monitor role
+if ($_SESSION['user_role'] === 'user') {
+    header("Location: admin-access-denied.php");
+    exit;
+}
+
 // Koneksi ke database
 require_once 'config.php';
 
