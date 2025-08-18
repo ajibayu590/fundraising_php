@@ -8,6 +8,9 @@ if (!in_array($user_role, ['admin', 'monitor'])) {
     exit;
 }
 
+// Database connection
+require_once 'config.php';
+
 // HYBRID APPROACH: Load admin and monitor users data
 try {
     $searchQuery = $_GET['search'] ?? '';
