@@ -265,8 +265,8 @@ $page_title = $page_title ?? 'Fundraising System';
 
     <!-- Include appropriate sidebar based on user role -->
     <?php
-    if ($user_role === 'admin') {
-        include 'sidebar-admin.php';
+    if ($user_role === 'admin' || $user_role === 'monitor') {
+        include 'sidebar-admin-new.php';
     } else {
         include 'sidebar-user.php';
     }
