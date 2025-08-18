@@ -371,8 +371,7 @@ try {
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
-                                        <button onclick="deleteKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-red-600 hover:text-red-900">Hapus</button>
+                                        <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900">Edit</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -447,6 +446,17 @@ try {
     <script>
         // Mobile menu functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Status change handler for nominal field
+            document.getElementById('status').addEventListener('change', function() {
+                const nominalField = document.getElementById('nominal-field');
+                if (this.value === 'berhasil') {
+                    nominalField.classList.remove('hidden');
+                } else {
+                    nominalField.classList.add('hidden');
+                    document.getElementById('nominal').value = '';
+                }
+            });
+            
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             const sidebar = document.getElementById('sidebar');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
@@ -479,7 +489,7 @@ try {
         
         function editKunjungan(id) {
             // Fetch kunjungan data and populate form
-            fetch(`api/kunjungan.php?id=${id}`)
+            fetch(`api/user-kunjungan.php?id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -502,22 +512,7 @@ try {
         }
         
         function deleteKunjungan(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus kunjungan ini?')) {
-                fetch(`api/kunjungan.php?id=${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        location.reload();
-                    } else {
-                        alert('Gagal menghapus kunjungan: ' + data.message);
-                    }
-                });
-            }
+            alert('Fitur hapus kunjungan tidak tersedia untuk role user. Silakan hubungi admin untuk menghapus data.');
         }
         
         function exportData() {
@@ -532,8 +527,14 @@ try {
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
+            // Validate required fields
+            if (!data.donatur_id || !data.alamat || !data.status) {
+                alert('Semua field wajib diisi');
+                return;
+            }
+            
             const method = data.id ? 'PUT' : 'POST';
-            const url = data.id ? `api/kunjungan.php?id=${data.id}` : 'api/kunjungan.php';
+            const url = data.id ? `api/user-kunjungan.php?id=${data.id}` : 'api/user-kunjungan.php';
             
             fetch(url, {
                 method: method,
@@ -551,6 +552,10 @@ try {
                 } else {
                     alert('Gagal menyimpan kunjungan: ' + data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
             });
         });
         

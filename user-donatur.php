@@ -539,7 +539,7 @@ try {
         
         function editDonatur(id) {
             // Fetch donatur data and populate form
-            fetch(`api/donatur.php?id=${id}`)
+            fetch(`api/user-donatur.php?id=${id}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -575,8 +575,14 @@ try {
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
+            // Validate required fields
+            if (!data.nama || !data.hp) {
+                alert('Nama dan HP wajib diisi');
+                return;
+            }
+            
             const method = data.id ? 'PUT' : 'POST';
-            const url = data.id ? `api/donatur.php?id=${data.id}` : 'api/donatur.php';
+            const url = data.id ? `api/user-donatur.php?id=${data.id}` : 'api/user-donatur.php';
             
             fetch(url, {
                 method: method,
@@ -594,6 +600,10 @@ try {
                 } else {
                     alert('Gagal menyimpan donatur: ' + data.message);
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat menyimpan data');
             });
         });
     </script>
