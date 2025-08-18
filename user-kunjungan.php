@@ -63,10 +63,14 @@ try {
     
 
     
+
+    
     // Get all donatur for suggestions (including those not yet visited by this user)
     $stmt = $pdo->prepare("SELECT id, nama, hp FROM donatur ORDER BY nama");
     $stmt->execute();
     $donaturList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+
     
     // Get user's stats
     $today = date('Y-m-d');

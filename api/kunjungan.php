@@ -25,6 +25,7 @@ try {
             k.status,
             k.nominal,
             k.catatan,
+            k.waktu,
             k.created_at,
             k.updated_at,
             u.name as fundraiser_nama,
@@ -35,7 +36,7 @@ try {
                     FROM kunjungan k
                     JOIN users u ON k.fundraiser_id = u.id
                     JOIN donatur d ON k.donatur_id = d.id
-                    ORDER BY k.created_at DESC
+                    ORDER BY k.waktu DESC
                 ");
                 $stmt->execute();
     
@@ -49,6 +50,7 @@ try {
             'status' => $row['status'],
             'nominal' => (int)$row['nominal'],
             'catatan' => $row['catatan'],
+            'waktu' => $row['waktu'],
             'created_at' => $row['created_at'],
             'updated_at' => $row['updated_at'],
             'fundraiser_nama' => $row['fundraiser_nama'],

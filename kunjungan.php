@@ -40,7 +40,7 @@ try {
     $statusFilter = $_GET['status'] ?? '';
     
     // Build query with filters
-    $whereConditions = ["DATE(k.created_at) BETWEEN ? AND ?"];
+    $whereConditions = ["DATE(k.waktu) BETWEEN ? AND ?"];
     $params = [$dateStart, $dateEnd];
     
     if (!empty($fundraiserFilter)) {
@@ -62,7 +62,7 @@ try {
         LEFT JOIN users u ON k.fundraiser_id = u.id 
         LEFT JOIN donatur d ON k.donatur_id = d.id 
         WHERE $whereClause
-        ORDER BY k.created_at DESC
+        ORDER BY k.waktu DESC
     ");
     $stmt->execute($params);
     $kunjunganData = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -362,7 +362,7 @@ try {
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <?php echo date('d/m/Y H:i', strtotime($kunjungan['created_at'])); ?>
+                                        <?php echo date('d/m/Y H:i', strtotime($kunjungan['waktu'])); ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>

@@ -33,8 +33,11 @@ try {
     $kategoriFilter = $_GET['kategori'] ?? '';
     
     // Build query with filters - ONLY donatur yang pernah dikunjungi oleh user ini
-    $whereConditions = ["d.id IN (SELECT DISTINCT donatur_id FROM kunjungan WHERE fundraiser_id = ?)"];
-    $params = [$user_id];
+    // Alternative: Get all donatur first, then filter by kunjungan
+    $whereConditions = ["1=1"]; // Start with all donatur
+    $params = [];
+    
+
     
     if (!empty($searchQuery)) {
         $whereConditions[] = "(d.nama LIKE ? OR d.hp LIKE ? OR d.email LIKE ?)";
@@ -57,16 +60,20 @@ try {
                COUNT(k.id) as jumlah_kunjungan,
                COALESCE(SUM(CASE WHEN k.status = 'berhasil' THEN k.nominal ELSE 0 END), 0) as total_donasi,
                COALESCE(AVG(CASE WHEN k.status = 'berhasil' THEN k.nominal END), 0) as rata_rata_donasi,
-               MIN(k.created_at) as first_donation,
-               MAX(k.created_at) as last_donation
+               MIN(k.waktu) as first_donation,
+               MAX(k.waktu) as last_donation
         FROM donatur d 
         LEFT JOIN kunjungan k ON d.id = k.donatur_id AND k.fundraiser_id = ?
-        WHERE $whereClause
+        WHERE $whereClause AND d.id IN (SELECT DISTINCT donatur_id FROM kunjungan WHERE fundraiser_id = ?)
         GROUP BY d.id, d.nama, d.hp, d.email, d.alamat, d.kategori, d.created_at
         ORDER BY d.nama ASC
     ");
+    $params[] = $user_id; // Add user_id for the JOIN condition
+    $params[] = $user_id; // Add user_id for the WHERE condition
     $stmt->execute($params);
     $donaturData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+
     
     // Get user's donatur stats
     $stmt = $pdo->prepare("
