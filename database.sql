@@ -30,6 +30,7 @@ CREATE TABLE donatur (
     email VARCHAR(255),
     alamat TEXT NOT NULL,
     kategori ENUM('individu', 'korporasi', 'yayasan', 'organisasi') NOT NULL,
+    catatan TEXT NULL,
     total_donasi DECIMAL(15,2) DEFAULT 0.00,
     terakhir_donasi TIMESTAMP NULL,
     status ENUM('aktif', 'nonaktif') NOT NULL DEFAULT 'aktif',

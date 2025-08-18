@@ -441,7 +441,8 @@ Detail Kunjungan:
     alert(message);
 }
 
-function editKunjungan(id) {
+// function editKunjungan(id) - DEPRECATED, moved to kunjungan_api.js
+function editKunjungan_OLD(id) {
     const kunjungan = kunjunganData.find(k => k.id == id);
     if (!kunjungan) {
         Utils.showNotification('Data kunjungan tidak ditemukan', 'error');
@@ -592,7 +593,7 @@ window.bulkUpdateTarget = bulkUpdateTarget;
 window.viewKunjungan = viewKunjungan;
 window.viewDonatur = viewDonatur;
 window.viewUser = viewUser;
-window.editKunjungan = editKunjungan;
+// window.editKunjungan = editKunjungan; // MOVED to kunjungan_api.js
 window.editDonatur = editDonatur;
 window.editUser = editUser;
 window.deleteKunjungan = deleteKunjungan;

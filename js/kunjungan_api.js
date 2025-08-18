@@ -107,19 +107,22 @@ const KunjunganAPI = {
     // Get kunjungan for editing
     async getKunjungan(id) {
         try {
+            console.log('Fetching kunjungan with id:', id);
             const response = await fetch(`api/kunjungan_crud.php?id=${id}`, {
                 method: 'GET',
                 headers: {
-                    'X-CSRF-Token': window.PHP_DATA.csrfToken
+                    'X-CSRF-Token': window.PHP_DATA?.csrfToken || ''
                 }
             });
             
+            console.log('Response status:', response.status);
             const result = await response.json();
+            console.log('Response data:', result);
             
             if (result.success) {
                 return result.data;
             } else {
-                Utils.showNotification(result.message, 'error');
+                Utils.showNotification(result.message || 'Failed to get kunjungan data', 'error');
                 return null;
             }
         } catch (error) {
@@ -146,9 +149,19 @@ function updateKunjunganModalTitle(isEdit) {
     const title = document.querySelector('#kunjungan-modal h3');
     if (!title) return;
     title.textContent = isEdit ? 'Edit Kunjungan Fundraiser' : 'Tambah Kunjungan Fundraiser';
+    
     const submitBtn = document.querySelector('#kunjungan-form button[type="submit"]');
     if (submitBtn) {
-        submitBtn.lastChild.textContent = isEdit ? ' Update Kunjungan' : ' Simpan Kunjungan';
+        const span = submitBtn.querySelector('span:not(.loading)');
+        if (span) {
+            span.textContent = isEdit ? 'Update Kunjungan' : 'Simpan Kunjungan';
+        } else {
+            // If no span found, update the button text directly (but preserve loading span)
+            const loadingSpan = submitBtn.querySelector('.loading');
+            submitBtn.innerHTML = '';
+            if (loadingSpan) submitBtn.appendChild(loadingSpan);
+            submitBtn.appendChild(document.createTextNode(isEdit ? 'Update Kunjungan' : 'Simpan Kunjungan'));
+        }
     }
 }
 
@@ -168,35 +181,56 @@ function resetStatusDependentFields() {
 }
 
 async function editKunjungan(id) {
-    const kunjungan = await KunjunganAPI.getKunjungan(id);
-    if (!kunjungan) return;
-    currentEditingKunjunganId = id;
+    console.log('editKunjungan called with id:', id);
+    
+    // Check if required elements exist
+    const modal = document.getElementById('kunjungan-modal');
+    if (!modal) {
+        console.error('Kunjungan modal not found');
+        Utils.showNotification('Modal form tidak ditemukan', 'error');
+        return;
+    }
+    
+    try {
+        const kunjungan = await KunjunganAPI.getKunjungan(id);
+        console.log('Retrieved kunjungan data:', kunjungan);
+        
+        if (!kunjungan) {
+            console.error('Kunjungan data not found for id:', id);
+            return;
+        }
+        currentEditingKunjunganId = id;
 
-    const fundraiserSelect = document.getElementById('kunjungan-fundraiser');
-    const donaturInput = document.getElementById('kunjungan-donatur');
-    const hpInput = document.getElementById('kunjungan-hp');
-    const statusSelect = document.getElementById('kunjungan-status');
-    const nominalInput = document.getElementById('kunjungan-nominal');
-    const followUpInput = document.getElementById('kunjungan-follow-up');
-    const alamatInput = document.getElementById('kunjungan-alamat');
-    const catatanInput = document.getElementById('kunjungan-catatan');
+        const fundraiserSelect = document.getElementById('kunjungan-fundraiser');
+        const donaturInput = document.getElementById('kunjungan-donatur');
+        const hpInput = document.getElementById('kunjungan-hp');
+        const statusSelect = document.getElementById('kunjungan-status');
+        const nominalInput = document.getElementById('kunjungan-nominal');
+        const followUpInput = document.getElementById('kunjungan-follow-up');
+        const alamatInput = document.getElementById('kunjungan-alamat');
+        const catatanInput = document.getElementById('kunjungan-catatan');
 
-    if (fundraiserSelect) fundraiserSelect.value = kunjungan.fundraiser_id || '';
-    if (donaturInput) donaturInput.value = kunjungan.donatur_name || '';
-    if (hpInput) hpInput.value = kunjungan.donatur_hp || '';
-    if (statusSelect) statusSelect.value = kunjungan.status || '';
+        if (fundraiserSelect) fundraiserSelect.value = kunjungan.fundraiser_id || '';
+        if (donaturInput) donaturInput.value = kunjungan.donatur_name || '';
+        if (hpInput) hpInput.value = kunjungan.donatur_hp || '';
+        if (statusSelect) statusSelect.value = kunjungan.status || '';
 
-    // apply status dependent
-    handleStatusToggle();
+        // apply status dependent fields
+        toggleStatusDependentFields();
 
-    if (nominalInput) nominalInput.value = (kunjungan.nominal && kunjungan.status === 'berhasil') ? kunjungan.nominal : '';
-    if (followUpInput) followUpInput.value = (kunjungan.follow_up_date && kunjungan.status === 'follow-up') ? kunjungan.follow_up_date.substring(0,10) : '';
-    if (alamatInput) alamatInput.value = kunjungan.alamat || '';
-    if (catatanInput) catatanInput.value = kunjungan.catatan || '';
+        if (nominalInput) nominalInput.value = (kunjungan.nominal && kunjungan.status === 'berhasil') ? kunjungan.nominal : '';
+        if (followUpInput) followUpInput.value = (kunjungan.follow_up_date && kunjungan.status === 'follow-up') ? kunjungan.follow_up_date.substring(0,10) : '';
+        if (alamatInput) alamatInput.value = kunjungan.alamat || '';
+        if (catatanInput) catatanInput.value = kunjungan.catatan || '';
 
-    updateKunjunganModalTitle(true);
-    document.getElementById('kunjungan-modal').classList.remove('hidden');
-    document.getElementById('kunjungan-modal').classList.add('flex');
+        updateKunjunganModalTitle(true);
+        document.getElementById('kunjungan-modal').classList.remove('hidden');
+        document.getElementById('kunjungan-modal').classList.add('flex');
+        
+    } catch (error) {
+        console.error('Error in editKunjungan:', error);
+        Utils.showNotification('Gagal membuka form edit kunjungan', 'error');
+    }
 }
 
 async function deleteKunjungan(id) {
@@ -205,6 +239,16 @@ async function deleteKunjungan(id) {
 
 // Form submission handler
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Kunjungan API loaded');
+    console.log('CSRF Token available:', !!window.PHP_DATA?.csrfToken);
+    
+    // Debug: Add click listener to all edit buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.textContent === 'Edit' && e.target.onclick) {
+            console.log('Edit button clicked:', e.target);
+        }
+    });
+    
     const kunjunganForm = document.getElementById('kunjungan-form');
     if (kunjunganForm) {
         kunjunganForm.addEventListener('submit', async function(e) {
@@ -236,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Status change handler
     const statusSelect = document.getElementById('kunjungan-status');
     if (statusSelect) {
-        statusSelect.addEventListener('change', handleStatusToggle);
+        statusSelect.addEventListener('change', toggleStatusDependentFields);
     }
     
     // Donatur suggestions
@@ -280,6 +324,34 @@ function selectDonatur(nama, hp) {
     document.getElementById('donatur-suggestions').classList.add('hidden');
 }
 
+// Helper function to toggle status dependent fields
+function toggleStatusDependentFields() {
+    const statusSelect = document.getElementById('kunjungan-status');
+    const nominalField = document.getElementById('nominal-field');
+    const followUpField = document.getElementById('follow-up-field');
+    const nominalInput = document.getElementById('kunjungan-nominal');
+    const followUpInput = document.getElementById('kunjungan-follow-up');
+    
+    if (!statusSelect || !nominalField || !followUpField) return;
+    
+    const status = statusSelect.value;
+    
+    // Hide all fields first
+    nominalField.classList.add('hidden');
+    followUpField.classList.add('hidden');
+    if (nominalInput) nominalInput.required = false;
+    if (followUpInput) followUpInput.required = false;
+    
+    // Show relevant fields based on status
+    if (status === 'berhasil') {
+        nominalField.classList.remove('hidden');
+        if (nominalInput) nominalInput.required = true;
+    } else if (status === 'follow-up') {
+        followUpField.classList.remove('hidden');
+        if (followUpInput) followUpInput.required = true;
+    }
+}
+
 // Export function
 function exportToExcel() {
     // Get current URL with filters
@@ -309,3 +381,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Make functions globally available
+window.editKunjungan = editKunjungan;
+window.deleteKunjungan = deleteKunjungan;
+window.selectDonatur = selectDonatur;
+window.toggleStatusDependentFields = toggleStatusDependentFields;
+window.showKunjunganModal = showKunjunganModal;
+window.hideKunjunganModal = hideKunjunganModal;
+
+// Debug function to test edit functionality
+window.testEditKunjungan = function(id) {
+    console.log('Testing editKunjungan with id:', id);
+    editKunjungan(id || 1);
+};
+
+console.log('Kunjungan API functions loaded. You can test with: testEditKunjungan(1)');
