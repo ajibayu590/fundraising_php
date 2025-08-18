@@ -54,7 +54,7 @@ try {
         LEFT JOIN kunjungan k ON u.id = k.fundraiser_id
         WHERE $whereClause
         GROUP BY u.id, u.name, u.email, u.hp, u.role, u.status, u.target, u.kunjungan_hari_ini, u.total_kunjungan_bulan, u.total_donasi_bulan, u.created_at, u.last_active
-        ORDER BY u.name
+        ORDER BY u.status DESC, u.name ASC
     ");
     $stmt->execute($params);
     $fundraisers = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -72,6 +72,9 @@ try {
     $aktiveFundraisers = 0;
     $totalTargetHarian = 0;
     $totalKunjunganHariIni = 0;
+    
+    // Debug: Show error for development
+    error_log("Fundraiser page error: " . $e->getMessage());
 }
 
 // CSRF token
@@ -85,6 +88,11 @@ echo get_csrf_token_meta();
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Fundraiser Management</h1>
             <p class="mt-1 text-sm text-gray-600">Kelola data fundraiser dan target kunjungan</p>
+            <?php if (isset($error_message)): ?>
+            <div class="mt-2 p-2 bg-red-100 border border-red-300 rounded text-sm text-red-700">
+                <?php echo htmlspecialchars($error_message); ?>
+            </div>
+            <?php endif; ?>
         </div>
         <div class="mt-4 sm:mt-0 flex space-x-2">
             <button onclick="refreshData()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
@@ -101,6 +109,22 @@ echo get_csrf_token_meta();
                 Tambah Fundraiser
             </button>
             <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Quick Info -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div class="flex items-center">
+            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-sm text-blue-800">
+                <strong>Semua data fundraiser langsung ditampilkan</strong> - 
+                Total <?php echo count($fundraisers); ?> fundraiser dengan target kunjungan masing-masing.
+                <?php if (empty($searchQuery) && empty($statusFilter)): ?>
+                <span class="text-green-600 font-medium">✓ Menampilkan semua data</span>
+                <?php endif; ?>
+            </p>
         </div>
     </div>
 
@@ -176,9 +200,9 @@ echo get_csrf_token_meta();
             <div>
                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select id="status" name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Semua Status</option>
-                    <option value="aktif" <?php echo $statusFilter === 'aktif' ? 'selected' : ''; ?>>Aktif</option>
-                    <option value="nonaktif" <?php echo $statusFilter === 'nonaktif' ? 'selected' : ''; ?>>Non-aktif</option>
+                    <option value="">📋 Semua Status (Default)</option>
+                    <option value="aktif" <?php echo $statusFilter === 'aktif' ? 'selected' : ''; ?>>✅ Aktif Saja</option>
+                    <option value="nonaktif" <?php echo $statusFilter === 'nonaktif' ? 'selected' : ''; ?>>❌ Non-aktif Saja</option>
                 </select>
             </div>
             <div class="flex items-end">
@@ -192,7 +216,27 @@ echo get_csrf_token_meta();
     <!-- Fundraiser Table -->
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Data Fundraiser (<?php echo count($fundraisers); ?>)</h2>
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Data Fundraiser (<?php echo count($fundraisers); ?>)</h2>
+                <div class="flex items-center space-x-2">
+                    <?php if (empty($searchQuery) && empty($statusFilter)): ?>
+                    <span class="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Semua Data Ditampilkan
+                    </span>
+                    <?php else: ?>
+                    <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        Data Difilter
+                    </span>
+                    <a href="fundraiser.php" class="text-xs text-blue-600 hover:text-blue-800">Reset Filter</a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
         
         <?php if (empty($fundraisers)): ?>
@@ -200,10 +244,42 @@ echo get_csrf_token_meta();
             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
             </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data fundraiser</h3>
-            <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan fundraiser baru.</p>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Tidak ada data fundraiser ditemukan</h3>
+            <p class="mt-1 text-sm text-gray-500">
+                <?php if (!empty($searchQuery) || !empty($statusFilter)): ?>
+                    Coba hapus filter atau ubah kriteria pencarian.
+                <?php else: ?>
+                    Belum ada fundraiser yang terdaftar. Tambahkan fundraiser baru untuk memulai.
+                <?php endif; ?>
+            </p>
+            <?php if ($user_role === 'admin'): ?>
+            <div class="mt-4">
+                <button onclick="showAddFundraiserModal()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Tambah Fundraiser Pertama
+                </button>
+            </div>
+            <?php endif; ?>
         </div>
         <?php else: ?>
+        
+        <!-- Data Loading Indicator -->
+        <div class="px-6 py-2 bg-green-50 border-l-4 border-green-400">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-green-700">
+                        <strong><?php echo count($fundraisers); ?> fundraiser</strong> berhasil dimuat dan ditampilkan di bawah.
+                    </p>
+                </div>
+            </div>
+        </div>
         
         <!-- Desktop Table -->
         <div class="hidden md:block overflow-x-auto">
@@ -462,8 +538,52 @@ echo get_csrf_token_meta();
 <?php endif; ?>
 
 <script>
+// Auto-load and display all fundraiser data
+document.addEventListener('DOMContentLoaded', function() {
+    // Show loading notification
+    showNotification('Memuat data fundraiser...', 'info', 2000);
+    
+    // Auto-expand all data (no need for additional clicks)
+    const dataTable = document.querySelector('.bg-white.rounded-lg.shadow.overflow-hidden');
+    if (dataTable) {
+        dataTable.style.display = 'block';
+        dataTable.style.visibility = 'visible';
+    }
+    
+    // Ensure all fundraiser data is visible
+    const tableRows = document.querySelectorAll('tbody tr');
+    tableRows.forEach(row => {
+        row.style.display = 'table-row';
+    });
+    
+    // Show success message if data loaded
+    const fundraiserCount = <?php echo count($fundraisers); ?>;
+    if (fundraiserCount > 0) {
+        setTimeout(() => {
+            showNotification(`✅ ${fundraiserCount} fundraiser data berhasil ditampilkan`, 'success', 3000);
+        }, 500);
+    } else {
+        <?php if (empty($searchQuery) && empty($statusFilter)): ?>
+        setTimeout(() => {
+            showNotification('ℹ️ Belum ada data fundraiser. Tambahkan fundraiser baru untuk memulai.', 'info', 5000);
+        }, 500);
+        <?php endif; ?>
+    }
+    
+    // Auto-scroll to table if data exists
+    if (fundraiserCount > 0) {
+        setTimeout(() => {
+            const tableElement = document.querySelector('.bg-white.rounded-lg.shadow.overflow-hidden');
+            if (tableElement) {
+                tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 1000);
+    }
+});
+
 // Fundraiser management functions
 function refreshData() {
+    showNotification('Refresh data...', 'info');
     window.location.reload();
 }
 
