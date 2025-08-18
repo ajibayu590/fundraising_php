@@ -287,7 +287,7 @@ tbody tr {
                 </svg>
                 Export Data
             </button>
-            <button onclick="window.location.href='users.php?action=add&role=user'" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+            <button onclick="showAddFundraiserModal()" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                 </svg>
@@ -389,8 +389,9 @@ async function saveTarget() {
 }
 
 async function editFundraiser(id) {
-    // Redirect to users.php with edit mode
-    window.location.href = `users.php?action=edit&id=${id}`;
+    // Edit fundraiser dalam fundraiser page - tidak redirect ke users.php
+    alert('Edit functionality untuk fundraiser ID: ' + id + '\nFitur ini akan membuka modal edit di halaman fundraiser.');
+    // TODO: Implement edit modal di fundraiser.php
 }
 
 async function deleteFundraiser(id) {
@@ -455,7 +456,8 @@ async function bulkUpdateTarget() {
 }
 
 function showAddFundraiserModal() {
-    alert('Add new fundraiser\nImplement add fundraiser modal or redirect');
+    alert('Tambah Fundraiser Baru\n\nFitur ini akan membuka modal untuk menambah fundraiser baru di halaman fundraiser.\nTidak terhubung dengan users.php.');
+    // TODO: Implement add fundraiser modal di fundraiser.php
 }
 </script>
 
