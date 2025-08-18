@@ -71,6 +71,7 @@ try {
                         k.status,
                         k.nominal,
                         k.catatan,
+                        k.waktu,
                         k.created_at,
                         k.updated_at,
                         d.nama as donatur_nama,
@@ -79,7 +80,7 @@ try {
                     FROM kunjungan k
                     JOIN donatur d ON k.donatur_id = d.id
                     WHERE k.fundraiser_id = ?
-                    ORDER BY k.created_at DESC
+                    ORDER BY k.waktu DESC
                 ");
                 $stmt->execute([$user_id]);
                 $kunjungan = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -143,6 +144,7 @@ try {
                     k.status,
                     k.nominal,
                     k.catatan,
+                    k.waktu,
                     k.created_at,
                     k.updated_at,
                     d.nama as donatur_nama,
@@ -218,6 +220,7 @@ try {
                     k.status,
                     k.nominal,
                     k.catatan,
+                    k.waktu,
                     k.created_at,
                     k.updated_at,
                     d.nama as donatur_nama,

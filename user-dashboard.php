@@ -398,7 +398,7 @@ try {
                             <?php foreach ($recent_activities as $activity): ?>
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <?php echo date('d/m/Y H:i', strtotime($activity['created_at'])); ?>
+                                        <?php echo date('d/m/Y H:i', strtotime($activity['waktu'])); ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div>
