@@ -893,28 +893,8 @@ async function deleteUser(id) {
     }
 }
 
-// Edit functions
-async function editKunjungan(id) {
-    const kunjungan = kunjunganData.find(k => k.id == id);
-    if (!kunjungan) {
-        Utils.showNotification('Kunjungan tidak ditemukan', 'error');
-        return;
-    }
-
-    // Populate form with existing data
-    document.getElementById('edit-kunjungan-id').value = kunjungan.id;
-    document.getElementById('edit-fundraiser').value = kunjungan.fundraiserId || kunjungan.fundraiser;
-    document.getElementById('edit-donatur').value = kunjungan.donaturId || kunjungan.donatur;
-    document.getElementById('edit-alamat').value = kunjungan.alamat;
-    document.getElementById('edit-lokasi').value = kunjungan.lokasi;
-    document.getElementById('edit-nominal').value = kunjungan.nominal;
-    document.getElementById('edit-status').value = kunjungan.status;
-    document.getElementById('edit-catatan').value = kunjungan.catatan;
-    document.getElementById('edit-follow-up-date').value = kunjungan.followUpDate || '';
-
-    // Show edit modal
-    document.getElementById('edit-kunjungan-modal').classList.remove('hidden');
-}
+// Edit functions - Moved to kunjungan_api.js
+// async function editKunjungan(id) - DEPRECATED, using kunjungan_api.js version
 
 async function editDonatur(id) {
     const donatur = donaturData.find(d => d.id == id);
