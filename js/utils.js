@@ -118,6 +118,11 @@ function throttle(func, limit) {
 // Show notification
 function showNotification(message, type = 'info', duration = 5000) {
     const container = document.getElementById('notification-container');
+    if (!container) {
+        console.error('Notification container not found');
+        return;
+    }
+    
     const notification = document.createElement('div');
     
     notification.className = `notification ${type}`;
@@ -420,4 +425,7 @@ function attachCSRFToken(form) {
 // Untuk fetch, tambahkan header: {'X-CSRF-Token': generateCSRFToken()}
 // =============================
 // END CSRF Utility
-// ============================= 
+// =============================
+
+// Make showNotification available globally for backward compatibility
+window.showNotification = showNotification; 

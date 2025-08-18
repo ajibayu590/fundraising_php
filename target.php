@@ -145,5 +145,6 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
     <script src="js/data.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/charts.js"></script>
 </body>
 </html>
