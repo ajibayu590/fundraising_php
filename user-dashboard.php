@@ -108,31 +108,45 @@ try {
             margin: 0 !important;
             padding: 0 !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb !important;
         }
         
+        /* Fixed Header */
         header {
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
             right: 0 !important;
-            z-index: 50 !important;
+            z-index: 1000 !important;
             background: white !important;
             border-bottom: 1px solid #e5e7eb !important;
+            height: 64px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         }
         
+        /* Sidebar */
+        .sidebar {
+            position: fixed !important;
+            top: 64px !important;
+            left: 0 !important;
+            width: 16rem !important;
+            height: calc(100vh - 64px) !important;
+            z-index: 500 !important;
+            background: white !important;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
+            overflow-y: auto !important;
+            transition: transform 0.3s ease-in-out !important;
+        }
+        
+        /* Main Content Area */
         .main-content {
+            margin-left: 16rem !important;
             margin-top: 64px !important;
-            padding: 1rem !important;
-            width: 100% !important;
+            padding: 2rem !important;
+            min-height: calc(100vh - 64px) !important;
+            width: calc(100% - 16rem) !important;
+            background-color: #f9fafb !important;
             box-sizing: border-box !important;
-        }
-        
-        @media (min-width: 768px) {
-            .main-content {
-                margin-left: 250px !important;
-                margin-top: 64px !important;
-                width: calc(100% - 250px) !important;
-            }
         }
         
         .progress-ring {
@@ -148,7 +162,7 @@ try {
         @media (max-width: 640px) {
             .main-content {
                 margin-left: 0 !important;
-                padding: 0.5rem !important;
+                padding: 1rem !important;
                 width: 100% !important;
             }
             
@@ -182,6 +196,7 @@ try {
             .main-content {
                 margin-left: 0 !important;
                 width: 100% !important;
+                padding: 1rem !important;
             }
             
             .sidebar {
@@ -212,25 +227,27 @@ try {
         .container {
             width: 100% !important;
             max-width: 100% !important;
-            padding: 0 1rem !important;
+            padding: 0 !important;
         }
         
-        @media (max-width: 640px) {
-            .container {
-                padding: 0 0.5rem !important;
-            }
+        /* Remove any default margins/padding */
+        .bg-gray-50 {
+            background-color: #f9fafb !important;
+        }
+        
+        /* Fix content spacing */
+        .space-y-6 > * + * {
+            margin-top: 1.5rem !important;
+        }
+        
+        .space-y-4 > * + * {
+            margin-top: 1rem !important;
         }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
     <?php include 'layout-header.php'; ?>
-    
-    <!-- Sidebar -->
-    <?php include 'sidebar-user.php'; ?>
-    
-    <!-- Main Content -->
-    <div class="main-content">
         <!-- Welcome Section -->
         <div class="mb-6">
             <h1 class="text-2xl font-bold text-gray-900">Selamat Datang, <?php echo htmlspecialchars($user_name); ?>!</h1>
@@ -422,6 +439,8 @@ try {
             </div>
         </div>
     </div>
+    
+    </main>
     
     <!-- Footer -->
     <?php include 'layout-footer.php'; ?>
