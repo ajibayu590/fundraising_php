@@ -59,7 +59,12 @@ if (count($_SESSION['login_attempts']) >= 5) {
                 $stmt = $pdo->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
                 $stmt->execute([$user['id']]);
                 
-                header("Location: dashboard.php");
+                // Redirect based on role
+                if ($user['role'] === 'user') {
+                    header("Location: user-dashboard.php");
+                } else {
+                    header("Location: dashboard.php");
+                }
                 exit;
             } else {
                 $error = "Email atau password salah!";
