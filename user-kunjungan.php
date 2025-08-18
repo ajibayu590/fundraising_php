@@ -61,7 +61,7 @@ try {
     $stmt->execute($params);
     $kunjunganData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Get all donatur for suggestions
+    // Get all donatur for suggestions (including those not yet visited by this user)
     $stmt = $pdo->prepare("SELECT id, nama, hp FROM donatur ORDER BY nama");
     $stmt->execute();
     $donaturList = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -125,6 +125,42 @@ try {
                 margin-top: 64px !important;
             }
         }
+        
+        /* Responsive fixes */
+        @media (max-width: 640px) {
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0.5rem !important;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .overflow-x-auto {
+                overflow-x: auto !important;
+            }
+            
+            table {
+                min-width: 600px !important;
+            }
+            
+            .modal {
+                width: 95% !important;
+                margin: 0 auto !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -143,7 +179,7 @@ try {
         </div>
         
         <!-- Today's Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-blue-100 rounded-lg">
@@ -212,7 +248,7 @@ try {
             
             <!-- Filters -->
             <div class="px-6 py-4 bg-gray-50">
-                <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</label>
                         <input type="date" name="date_start" value="<?php echo htmlspecialchars($dateStart); ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -310,7 +346,7 @@ try {
     
     <!-- Add/Edit Modal -->
     <div id="kunjunganModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-md shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">Tambah Kunjungan Baru</h3>
                 <form id="kunjunganForm" class="space-y-4">
@@ -368,6 +404,25 @@ try {
     <?php include 'layout-footer.php'; ?>
     
     <script>
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            if (mobileMenuBtn && sidebar) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    sidebarOverlay.classList.toggle('active');
+                });
+                
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+        });
+        
         // Modal functions
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Tambah Kunjungan Baru';

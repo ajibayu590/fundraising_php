@@ -139,6 +139,37 @@ try {
             transition: stroke-dasharray 0.35s;
             transform-origin: 50% 50%;
         }
+        
+        /* Responsive fixes */
+        @media (max-width: 640px) {
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0.5rem !important;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .overflow-x-auto {
+                overflow-x: auto !important;
+            }
+            
+            table {
+                min-width: 600px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -171,7 +202,7 @@ try {
         <?php endif; ?>
         
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
             <!-- Target Progress -->
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center justify-between">
@@ -240,7 +271,7 @@ try {
         </div>
         
         <!-- Monthly Summary -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-8">
             <!-- Monthly Stats -->
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Ringkasan Bulan Ini</h3>
@@ -346,6 +377,25 @@ try {
     <?php include 'layout-footer.php'; ?>
     
     <script>
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            if (mobileMenuBtn && sidebar) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    sidebarOverlay.classList.toggle('active');
+                });
+                
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+        });
+        
         // Weekly Chart
         const weeklyData = <?php echo json_encode($weekly_progress); ?>;
         const ctx = document.getElementById('weeklyChart').getContext('2d');

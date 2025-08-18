@@ -196,6 +196,37 @@ try {
                 margin-top: 64px !important;
             }
         }
+        
+        /* Responsive fixes */
+        @media (max-width: 640px) {
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0.5rem !important;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .lg\:col-span-2 {
+                grid-column: span 1 !important;
+            }
+            
+            .lg\:col-span-3 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -226,7 +257,7 @@ try {
             </div>
         <?php endif; ?>
         
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <!-- Profile Form -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow">
@@ -235,7 +266,7 @@ try {
                     </div>
                     <div class="p-6">
                         <form method="POST" class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
                                     <input type="text" name="name" value="<?php echo htmlspecialchars($user['name']); ?>" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -269,7 +300,7 @@ try {
                             
                             <div class="border-t border-gray-200 pt-6">
                                 <h4 class="text-md font-medium text-gray-900 mb-4">Ubah Password</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Password Saat Ini</label>
                                         <input type="password" name="current_password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Kosongkan jika tidak ingin mengubah">
@@ -418,5 +449,26 @@ try {
     
     <!-- Footer -->
     <?php include 'layout-footer.php'; ?>
+    
+    <script>
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
+            
+            if (mobileMenuBtn && sidebar) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    sidebarOverlay.classList.toggle('active');
+                });
+                
+                sidebarOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    sidebarOverlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
