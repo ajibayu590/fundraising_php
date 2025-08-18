@@ -47,4 +47,17 @@ function get_csrf_token_field() {
 function get_csrf_token_meta() {
     return '<meta name="csrf-token" content="' . generate_csrf_token() . '">';
 }
+
+// Helper function untuk mendapatkan setting value
+function getSettingValue($key, $default = '') {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ?");
+        $stmt->execute([$key]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['setting_value'] : $default;
+    } catch (Exception $e) {
+        return $default;
+    }
+}
 ?>

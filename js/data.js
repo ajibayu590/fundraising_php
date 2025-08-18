@@ -19,12 +19,40 @@ const DataManager = {
             await Promise.all([
                 this.loadUsers(),
                 this.loadDonatur(),
-                this.loadKunjungan()
+                this.loadKunjungan(),
+                this.loadSettings()
             ]);
             console.log('All data loaded successfully');
         } catch (error) {
             console.error('Error loading data:', error);
             Utils.showNotification('Gagal memuat data dari database', 'error');
+        }
+    },
+
+    // Load settings from database
+    async loadSettings() {
+        try {
+            const response = await fetch('api/settings.php', {
+                method: 'GET',
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                // Update global settings object
+                if (typeof window.settings !== 'undefined') {
+                    window.settings.targetGlobal = parseInt(result.data.target_global) || 8;
+                    window.settings.targetDonasi = parseInt(result.data.target_donasi) || 1000000;
+                    window.settings.targetDonaturBaru = parseInt(result.data.target_donatur_baru) || 50;
+                }
+                console.log('Settings loaded successfully');
+            } else {
+                console.error('Failed to load settings:', result.message);
+            }
+        } catch (error) {
+            console.error('Error loading settings:', error);
         }
     },
 
@@ -193,6 +221,62 @@ const DataManager = {
         }
         
         return filtered;
+    },
+
+    // Update settings
+    async updateSettings(settings) {
+        try {
+            // Update target global setting
+            const response = await fetch('api/settings.php?key=target_global', {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ value: settings.targetGlobal })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update target global');
+            }
+
+            // Update target donasi setting
+            const response2 = await fetch('api/settings.php?key=target_donasi', {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ value: settings.targetDonasi })
+            });
+            
+            if (!response2.ok) {
+                throw new Error('Failed to update target donasi');
+            }
+
+            // Update target donatur baru setting
+            const response3 = await fetch('api/settings.php?key=target_donatur_baru', {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ value: settings.targetDonaturBaru })
+            });
+            
+            if (!response3.ok) {
+                throw new Error('Failed to update target donatur baru');
+            }
+
+            console.log('Settings updated successfully');
+            return true;
+        } catch (error) {
+            console.error('Error updating settings:', error);
+            throw error;
+        }
     }
 };
 

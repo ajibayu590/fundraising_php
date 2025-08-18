@@ -1,4 +1,6 @@
 <?php
+// Prevent any output before headers
+ob_start();
 session_start();
 
 // Periksa apakah user sudah login
@@ -34,6 +36,7 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
     <title>Target & Laporan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/main.css">
+    <?php echo get_csrf_token_meta(); ?>
 </head>
 <body class="bg-gray-100">
     <!-- Mobile Menu Button -->
@@ -60,15 +63,15 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Target Kunjungan Harian</label>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="8" id="target-global" min="1" max="20">
+                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="<?php echo getSettingValue('target_global', 8); ?>" id="target-global" min="1" max="20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Target Donasi Harian (Rp)</label>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="1000000" id="target-donasi" min="100000" step="100000">
+                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="<?php echo getSettingValue('target_donasi', 1000000); ?>" id="target-donasi" min="100000" step="100000">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Target Donatur Baru per Bulan</label>
-                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="50" id="target-donatur-baru" min="10">
+                        <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="<?php echo getSettingValue('target_donatur_baru', 50); ?>" id="target-donatur-baru" min="10">
                     </div>
                     <button onclick="updateTargetGlobal()" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                         Update Target Global

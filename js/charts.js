@@ -371,7 +371,7 @@ function refreshTargetProgress() {
 }
 
 // Target management
-function updateTargetGlobal() {
+async function updateTargetGlobal() {
     const targetGlobal = parseInt(document.getElementById('target-global').value);
     const targetDonasi = parseInt(document.getElementById('target-donasi').value);
     const targetDonaturBaru = parseInt(document.getElementById('target-donatur-baru').value);
@@ -381,13 +381,20 @@ function updateTargetGlobal() {
         return;
     }
     
-    settings.targetGlobal = targetGlobal;
-    settings.targetDonasi = targetDonasi;
-    settings.targetDonaturBaru = targetDonaturBaru;
-    
-    DataManager.updateSettings(settings);
-    updateTargetStats();
-    Utils.showNotification('Target global berhasil diupdate', 'success');
+    try {
+        const settings = {
+            targetGlobal: targetGlobal,
+            targetDonasi: targetDonasi,
+            targetDonaturBaru: targetDonaturBaru
+        };
+        
+        await DataManager.updateSettings(settings);
+        updateTargetStats();
+        Utils.showNotification('Target global berhasil diupdate', 'success');
+    } catch (error) {
+        console.error('Error updating target global:', error);
+        Utils.showNotification('Gagal mengupdate target global', 'error');
+    }
 }
 
 // Report functions

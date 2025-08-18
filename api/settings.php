@@ -35,7 +35,8 @@ function validate_setting_key($key) {
     $allowedKeys = [
         'app_name', 'version', 'company_name', 'company_address', 'company_phone', 
         'company_email', 'target_monthly', 'target_yearly', 'currency_format',
-        'app_logo', 'theme_color', 'notification_enabled', 'auto_backup'
+        'app_logo', 'theme_color', 'notification_enabled', 'auto_backup',
+        'target_global', 'target_donasi', 'target_donatur_baru'
     ];
     return in_array($key, $allowedKeys);
 }
@@ -45,6 +46,9 @@ function validate_setting_value($key, $value) {
     switch ($key) {
         case 'target_monthly':
         case 'target_yearly':
+        case 'target_global':
+        case 'target_donasi':
+        case 'target_donatur_baru':
             return is_numeric($value) && $value >= 0;
         case 'currency_format':
             return in_array($value, ['IDR', 'USD', 'EUR', 'SGD']);
