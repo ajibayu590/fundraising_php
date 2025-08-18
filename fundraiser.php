@@ -214,24 +214,24 @@ tbody tr {
                                     <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full <?php 
                                         echo $f['status'] === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'; 
                                     ?>">
-                                        <?php echo $f['status'] === 'aktif' ? '✅ Aktif' : '❌ Non-aktif'; ?>
+                                        <?php echo ucfirst($f['status']); ?>
                                     </span>
                                 </td>
                                 <?php if ($user_role === 'admin'): ?>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-                                    <div class="space-y-1">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
                                         <button onclick="editFundraiser(<?php echo $f['id']; ?>)" 
-                                                class="block w-full px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700">
-                                            ✏️ Edit
+                                                class="text-blue-600 hover:text-blue-900 transition-colors">
+                                            Edit
                                         </button>
                                         <button onclick="setTarget(<?php echo $f['id']; ?>, <?php echo $f['target']; ?>)" 
-                                                class="block w-full px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">
-                                            🎯 Target
+                                                class="text-green-600 hover:text-green-900 transition-colors">
+                                            Target
                                         </button>
                                         <?php if ($f['id'] != $_SESSION['user_id']): ?>
                                         <button onclick="deleteFundraiser(<?php echo $f['id']; ?>)" 
-                                                class="block w-full px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700">
-                                            🗑️ Hapus
+                                                class="text-red-600 hover:text-red-900 transition-colors">
+                                            Hapus
                                         </button>
                                         <?php endif; ?>
                                     </div>
@@ -273,16 +273,25 @@ tbody tr {
     <?php if ($user_role === 'admin' && $totalFundraisers > 0): ?>
     <!-- Admin Actions -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">🔧 Admin Actions</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Admin Actions</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onclick="bulkUpdateTarget()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">
-                📊 Update Target Massal
+            <button onclick="bulkUpdateTarget()" class="inline-flex items-center justify-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Update Target Massal
             </button>
-            <button onclick="window.open('users.php?export=csv&role=user', '_blank')" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                📥 Export Data
+            <button onclick="window.open('users.php?export=csv&role=user', '_blank')" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Data
             </button>
-            <button onclick="showAddFundraiserModal()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-                ➕ Tambah Fundraiser
+            <button onclick="window.location.href='users.php?action=add&role=user'" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Tambah Fundraiser
             </button>
         </div>
     </div>
@@ -329,11 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const fundraiserCount = <?php echo count($fundraisers); ?>;
     console.log(`📊 Fundraiser count: ${fundraiserCount}`);
     
-    if (fundraiserCount > 0) {
-        alert(`✅ SUCCESS: ${fundraiserCount} fundraiser data berhasil ditampilkan!`);
-    } else {
-        alert('⚠️ INFO: Belum ada data fundraiser. Insert dummy data terlebih dahulu.');
-    }
+    // Data loaded silently - no popup alerts
 });
 
 // Target management functions
@@ -347,7 +352,7 @@ function closeTargetModal() {
     document.getElementById('targetModal').classList.add('hidden');
 }
 
-function saveTarget() {
+async function saveTarget() {
     const userId = document.getElementById('targetUserId').value;
     const newTarget = document.getElementById('newTarget').value;
     
@@ -356,29 +361,96 @@ function saveTarget() {
         return;
     }
     
-    // Simple approach - reload with parameters
-    const url = `users.php?action=update_target&id=${userId}&target=${newTarget}`;
-    if (confirm(`Update target menjadi ${newTarget} kunjungan per hari?`)) {
-        window.location.href = url;
-    }
-}
-
-function editFundraiser(id) {
-    alert(`Edit fundraiser ID: ${id}\nImplement edit modal or redirect to edit page`);
-}
-
-function deleteFundraiser(id) {
-    if (confirm('Yakin ingin menghapus fundraiser ini?')) {
-        alert(`Delete fundraiser ID: ${id}\nImplement delete functionality`);
-    }
-}
-
-function bulkUpdateTarget() {
-    const newTarget = prompt('Target harian baru untuk semua fundraiser:', '8');
-    if (newTarget && parseInt(newTarget) > 0) {
-        if (confirm(`Update semua target menjadi ${newTarget} kunjungan per hari?`)) {
-            alert(`Bulk update to ${newTarget}\nImplement bulk update functionality`);
+    try {
+        const response = await fetch(`api/users_crud.php?id=${userId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                target: parseInt(newTarget)
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Target berhasil diupdate!');
+            closeTargetModal();
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            alert('❌ ' + (result.message || 'Gagal update target'));
         }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Terjadi kesalahan sistem');
+    }
+}
+
+async function editFundraiser(id) {
+    // Redirect to users.php with edit mode
+    window.location.href = `users.php?action=edit&id=${id}`;
+}
+
+async function deleteFundraiser(id) {
+    if (!confirm('Yakin ingin menghapus fundraiser ini?')) return;
+    
+    try {
+        const response = await fetch(`api/users_crud.php?id=${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('✅ Fundraiser berhasil dihapus!');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            alert('❌ ' + (result.message || 'Gagal menghapus fundraiser'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Terjadi kesalahan sistem');
+    }
+}
+
+async function bulkUpdateTarget() {
+    const newTarget = prompt('Target harian baru untuk semua fundraiser:', '8');
+    if (!newTarget || parseInt(newTarget) < 1) return;
+    
+    if (!confirm(`Update semua target menjadi ${newTarget} kunjungan per hari?`)) return;
+    
+    try {
+        // Get all fundraiser IDs
+        const fundraiserIds = <?php echo json_encode(array_column($fundraisers, 'id')); ?>;
+        let successCount = 0;
+        
+        for (const id of fundraiserIds) {
+            const response = await fetch(`api/users_crud.php?id=${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    target: parseInt(newTarget)
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) successCount++;
+        }
+        
+        alert(`✅ Berhasil update ${successCount} dari ${fundraiserIds.length} fundraiser`);
+        setTimeout(() => window.location.reload(), 1000);
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Terjadi kesalahan sistem');
     }
 }
 

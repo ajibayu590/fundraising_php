@@ -358,6 +358,33 @@ try {
         </div>
     </div>
 
+    <?php if ($user_role === 'admin'): ?>
+    <!-- Admin Tools -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">🔧 Admin Tools</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button onclick="insertDummyData()" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Insert Data Dummy
+            </button>
+            <button onclick="deleteDummyData()" class="inline-flex items-center justify-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Hapus Data Dummy
+            </button>
+            <button onclick="exportData()" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Data
+            </button>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Scripts -->
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>
@@ -365,5 +392,66 @@ try {
     <script src="js/charts.js"></script>
     <script src="js/app.js"></script>
     <script src="js/mobile-menu.js"></script>
+
+    <script>
+    // Admin dummy data functions
+    async function insertDummyData() {
+        if (!confirm('Yakin ingin menambahkan data dummy ke database?')) return;
+        
+        try {
+            const response = await fetch('api/dummy.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ action: 'insert_dummy_data' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ Data dummy berhasil ditambahkan!');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                alert('❌ ' + (result.message || 'Gagal menambahkan data dummy'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Terjadi kesalahan sistem');
+        }
+    }
+
+    async function deleteDummyData() {
+        if (!confirm('Yakin ingin menghapus semua data dummy dari database?')) return;
+        
+        try {
+            const response = await fetch('api/dummy.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ action: 'delete_dummy_data' })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('✅ Data dummy berhasil dihapus!');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                alert('❌ ' + (result.message || 'Gagal menghapus data dummy'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Terjadi kesalahan sistem');
+        }
+    }
+
+    function exportData() {
+        window.open('export.php', '_blank');
+    }
+    </script>
 </body>
 </html>
