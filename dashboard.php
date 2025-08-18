@@ -84,7 +84,7 @@ try {
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#3b82f6">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -93,6 +93,34 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles/main.css">
     <?php echo get_csrf_token_meta(); ?>
+    
+    <style>
+        /* Critical inline CSS to prevent header overlap */
+        @media (max-width: 768px) {
+            body { margin: 0 !important; padding: 0 !important; }
+            header { 
+                position: fixed !important; 
+                top: 0 !important; 
+                left: 0 !important; 
+                right: 0 !important; 
+                z-index: 10000 !important; 
+                background: white !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            }
+            .page-wrapper { padding-top: 5rem !important; }
+            .sidebar { z-index: 100 !important; }
+            .main-content { padding-top: 1rem !important; }
+        }
+        
+        @media (min-width: 769px) {
+            header { 
+                position: relative !important; 
+                z-index: 10000 !important; 
+                background: white !important; 
+            }
+            .sidebar { z-index: 100 !important; }
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <!-- Mobile Menu Button -->
@@ -123,12 +151,14 @@ try {
         </div>
     </header>
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <?php include $user_role === 'admin' ? 'sidebar-admin.php' : 'sidebar-user.php'; ?>
+    <!-- Page Wrapper -->
+    <div class="page-wrapper">
+        <div class="flex">
+            <!-- Sidebar -->
+            <?php include $user_role === 'admin' ? 'sidebar-admin.php' : 'sidebar-user.php'; ?>
 
-        <!-- Main Content -->
-        <div class="main-content flex-1 p-4 md:p-8">
+            <!-- Main Content -->
+            <div class="main-content flex-1 p-4 md:p-8">
             <!-- Dashboard Header -->
             <div class="mb-6 md:mb-8">
                 <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dashboard</h2>

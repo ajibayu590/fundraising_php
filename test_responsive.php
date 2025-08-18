@@ -99,7 +99,7 @@
             </div>
 
             <!-- Test Instructions -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Test Instructions</h3>
                 <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600">
                     <li>Resize browser window to test different breakpoints</li>
@@ -108,22 +108,74 @@
                     <li>Sidebar should slide in from left with overlay</li>
                     <li>Click overlay or sidebar link to close sidebar</li>
                     <li>On tablet/desktop: Sidebar should be always visible, no mobile menu button</li>
-                    <li>Header should not overlap with content</li>
+                    <li><strong>CRITICAL: Header should NEVER be covered by sidebar</strong></li>
                     <li>Test swipe gestures on mobile devices</li>
                 </ol>
+            </div>
+
+            <!-- Z-Index Debug Info -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-yellow-800 mb-4">Z-Index Debug Info</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                        <strong>Header Z-Index:</strong> <span id="header-zindex">-</span><br>
+                        <strong>Sidebar Z-Index:</strong> <span id="sidebar-zindex">-</span><br>
+                        <strong>Mobile Menu Z-Index:</strong> <span id="menu-zindex">-</span>
+                    </div>
+                    <div>
+                        <strong>Header Position:</strong> <span id="header-position">-</span><br>
+                        <strong>Sidebar Position:</strong> <span id="sidebar-position">-</span><br>
+                        <strong>Screen Size:</strong> <span id="screen-category">-</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Update screen dimensions
+        // Update screen dimensions and debug info
         function updateScreenInfo() {
-            document.getElementById('screen-width').textContent = window.innerWidth;
-            document.getElementById('screen-height').textContent = window.innerHeight;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            document.getElementById('screen-width').textContent = width;
+            document.getElementById('screen-height').textContent = height;
+            
+            // Screen category
+            let category = '';
+            if (width <= 768) category = 'Mobile';
+            else if (width <= 1024) category = 'Tablet';
+            else category = 'Desktop';
+            document.getElementById('screen-category').textContent = category;
+            
+            // Get computed styles
+            const header = document.querySelector('header');
+            const sidebar = document.querySelector('.sidebar');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (header) {
+                const headerStyle = window.getComputedStyle(header);
+                document.getElementById('header-zindex').textContent = headerStyle.zIndex;
+                document.getElementById('header-position').textContent = headerStyle.position;
+            }
+            
+            if (sidebar) {
+                const sidebarStyle = window.getComputedStyle(sidebar);
+                document.getElementById('sidebar-zindex').textContent = sidebarStyle.zIndex;
+                document.getElementById('sidebar-position').textContent = sidebarStyle.position;
+            }
+            
+            if (mobileBtn) {
+                const menuStyle = window.getComputedStyle(mobileBtn);
+                document.getElementById('menu-zindex').textContent = menuStyle.zIndex;
+            }
         }
         
         updateScreenInfo();
         window.addEventListener('resize', updateScreenInfo);
+        
+        // Update every second to catch any changes
+        setInterval(updateScreenInfo, 1000);
     </script>
     <script src="js/mobile-menu.js"></script>
 </body>
