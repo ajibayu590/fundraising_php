@@ -116,8 +116,8 @@ try {
             
             // Insert new kunjungan
             $stmt = $pdo->prepare("
-                INSERT INTO kunjungan (fundraiser_id, donatur_id, alamat, status, nominal, catatan, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                INSERT INTO kunjungan (fundraiser_id, donatur_id, alamat, status, nominal, catatan, waktu, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())
             ");
             
             $stmt->execute([
@@ -128,6 +128,8 @@ try {
                 $input['nominal'] ?? 0,
                 $input['catatan'] ?? ''
             ]);
+            
+
             
             $kunjungan_id = $pdo->lastInsertId();
             
@@ -192,7 +194,7 @@ try {
             // Update kunjungan
             $stmt = $pdo->prepare("
                 UPDATE kunjungan 
-                SET donatur_id = ?, alamat = ?, status = ?, nominal = ?, catatan = ?, updated_at = NOW()
+                SET donatur_id = ?, alamat = ?, status = ?, nominal = ?, catatan = ?, waktu = NOW(), updated_at = NOW()
                 WHERE id = ? AND fundraiser_id = ?
             ");
             

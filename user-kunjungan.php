@@ -38,7 +38,7 @@ try {
     $params = [$user_id];
     
     if (!empty($dateStart) && !empty($dateEnd)) {
-        $whereConditions[] = "DATE(k.created_at) BETWEEN ? AND ?";
+        $whereConditions[] = "DATE(k.waktu) BETWEEN ? AND ?";
         $params[] = $dateStart;
         $params[] = $dateEnd;
     }
@@ -56,10 +56,12 @@ try {
         FROM kunjungan k 
         LEFT JOIN donatur d ON k.donatur_id = d.id 
         WHERE $whereClause
-        ORDER BY k.created_at DESC
+        ORDER BY k.waktu DESC
     ");
     $stmt->execute($params);
     $kunjunganData = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+
     
     // Get all donatur for suggestions (including those not yet visited by this user)
     $stmt = $pdo->prepare("SELECT id, nama, hp FROM donatur ORDER BY nama");
@@ -68,15 +70,15 @@ try {
     
     // Get user's stats
     $today = date('Y-m-d');
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ?");
     $stmt->execute([$user_id, $today]);
     $kunjungan_hari_ini = $stmt->fetchColumn();
     
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ? AND status = 'berhasil'");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ? AND status = 'berhasil'");
     $stmt->execute([$user_id, $today]);
     $berhasil_hari_ini = $stmt->fetchColumn();
     
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ? AND status = 'berhasil'");
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ? AND status = 'berhasil'");
     $stmt->execute([$user_id, $today]);
     $total_donasi_hari_ini = $stmt->fetchColumn();
     
@@ -337,7 +339,7 @@ try {
                             <?php foreach ($kunjunganData as $kunjungan): ?>
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <?php echo date('d/m/Y H:i', strtotime($kunjungan['created_at'])); ?>
+                                        <?php echo date('d/m/Y H:i', strtotime($kunjungan['waktu'])); ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div>

@@ -32,27 +32,27 @@ try {
     $current_month = date('Y-m');
     
     // User's kunjungan hari ini
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ?");
     $stmt->execute([$user_id, $today]);
     $kunjungan_hari_ini = $stmt->fetchColumn();
     
     // User's donasi berhasil hari ini
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ? AND status = 'berhasil'");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ? AND status = 'berhasil'");
     $stmt->execute([$user_id, $today]);
     $donasi_berhasil_hari_ini = $stmt->fetchColumn();
     
     // User's total donasi hari ini
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE(created_at) = ? AND status = 'berhasil'");
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE(waktu) = ? AND status = 'berhasil'");
     $stmt->execute([$user_id, $today]);
     $total_donasi_hari_ini = $stmt->fetchColumn();
     
     // User's kunjungan bulan ini
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE_FORMAT(created_at, '%Y-%m') = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM kunjungan WHERE fundraiser_id = ? AND DATE_FORMAT(waktu, '%Y-%m') = ?");
     $stmt->execute([$user_id, $current_month]);
     $kunjungan_bulan_ini = $stmt->fetchColumn();
     
     // User's total donasi bulan ini
-    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE_FORMAT(created_at, '%Y-%m') = ? AND status = 'berhasil'");
+    $stmt = $pdo->prepare("SELECT COALESCE(SUM(nominal), 0) FROM kunjungan WHERE fundraiser_id = ? AND DATE_FORMAT(waktu, '%Y-%m') = ? AND status = 'berhasil'");
     $stmt->execute([$user_id, $current_month]);
     $total_donasi_bulan_ini = $stmt->fetchColumn();
     
@@ -62,7 +62,7 @@ try {
         FROM kunjungan k 
         LEFT JOIN donatur d ON k.donatur_id = d.id 
         WHERE k.fundraiser_id = ?
-        ORDER BY k.created_at DESC 
+        ORDER BY k.waktu DESC 
         LIMIT 10
     ");
     $stmt->execute([$user_id]);
@@ -74,11 +74,11 @@ try {
     
     // Weekly progress (last 7 days)
     $stmt = $pdo->prepare("
-        SELECT DATE(created_at) as date, COUNT(*) as kunjungan_count, 
+        SELECT DATE(waktu) as date, COUNT(*) as kunjungan_count, 
                SUM(CASE WHEN status = 'berhasil' THEN nominal ELSE 0 END) as total_donasi
         FROM kunjungan 
-        WHERE fundraiser_id = ? AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-        GROUP BY DATE(created_at)
+        WHERE fundraiser_id = ? AND waktu >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        GROUP BY DATE(waktu)
         ORDER BY date DESC
     ");
     $stmt->execute([$user_id]);
