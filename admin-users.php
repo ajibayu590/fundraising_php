@@ -72,6 +72,7 @@ try {
     $totalAdmins = 0;
     $totalMonitors = 0;
     $activeUsers = 0;
+    error_log("Admin users page error: " . $e->getMessage());
 }
 
 // CSRF token
