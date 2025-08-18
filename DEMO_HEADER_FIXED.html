@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Header Fixed vs Non-Fixed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Demo styles */
+        .demo-container {
+            height: 400px;
+            border: 2px solid #e5e7eb;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-content {
+            height: 800px;
+            background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+            padding: 20px;
+        }
+        
+        /* Old Header (Non-Fixed) */
+        .old-header {
+            position: relative !important;
+            background: #3b82f6;
+            color: white;
+            padding: 1rem;
+            z-index: 10;
+        }
+        
+        .old-sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+        
+        .old-main {
+            margin-left: 200px;
+            padding: 0;
+        }
+        
+        /* New Header (Fixed) */
+        .new-header {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #3b82f6;
+            color: white;
+            padding: 1rem;
+            z-index: 1000;
+            height: 64px;
+        }
+        
+        .new-sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 200px;
+            height: calc(100% - 64px);
+            background: white;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+            z-index: 500;
+        }
+        
+        .new-main {
+            margin-left: 200px;
+            margin-top: 64px;
+            padding: 0;
+        }
+        
+        .demo-scroll {
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem;
+        }
+        
+        .nav-item {
+            display: block;
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            color: #374151;
+        }
+        
+        .nav-item:hover {
+            background: #e5e7eb;
+        }
+        
+        .content-block {
+            background: white;
+            margin: 1rem 0;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6 space-y-8">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Demo: Header Fixed vs Non-Fixed</h1>
+            <p class="text-gray-600">Scroll pada kedua demo di bawah untuk melihat perbedaannya</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- OLD VERSION (Non-Fixed Header) -->
+            <div>
+                <h2 class="text-xl font-semibold text-red-600 mb-4">❌ SEBELUM: Header Non-Fixed</h2>
+                <div class="demo-container">
+                    <div class="demo-scroll">
+                        <div class="old-header">
+                            <h3 class="font-bold">Header Non-Fixed (Ikut Scroll)</h3>
+                        </div>
+                        <div class="old-sidebar">
+                            <div class="sidebar-nav">
+                                <h4 class="font-semibold mb-2">Navigation</h4>
+                                <a href="#" class="nav-item">Dashboard</a>
+                                <a href="#" class="nav-item">Users</a>
+                                <a href="#" class="nav-item">Donatur</a>
+                                <a href="#" class="nav-item">Kunjungan</a>
+                                <a href="#" class="nav-item">Settings</a>
+                            </div>
+                        </div>
+                        <div class="old-main">
+                            <div class="demo-content">
+                                <div class="content-block">
+                                    <h4 class="font-semibold text-lg mb-2">Masalah:</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                        <li>Header ikut scroll ke atas</li>
+                                        <li>Sidebar menutupi header saat scroll</li>
+                                        <li>Navigation tidak selalu accessible</li>
+                                        <li>User experience kurang baik</li>
+                                    </ul>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 1</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Scroll untuk melihat masalahnya.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 2</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Perhatikan bagaimana header menghilang saat Anda scroll ke bawah.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 3</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Sidebar juga menutupi area header karena positioning yang tidak tepat.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 4</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Scroll terus untuk melihat efeknya...</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 5</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Header sudah tidak terlihat lagi di sini.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded">
+                    <p class="text-sm text-red-700">⚠️ Header hilang saat scroll, sidebar overlap dengan header</p>
+                </div>
+            </div>
+            
+            <!-- NEW VERSION (Fixed Header) -->
+            <div>
+                <h2 class="text-xl font-semibold text-green-600 mb-4">✅ SESUDAH: Header Fixed</h2>
+                <div class="demo-container">
+                    <div class="demo-scroll">
+                        <div class="new-header">
+                            <h3 class="font-bold">Header Fixed (Tetap di Atas)</h3>
+                        </div>
+                        <div class="new-sidebar">
+                            <div class="sidebar-nav">
+                                <h4 class="font-semibold mb-2">Navigation</h4>
+                                <a href="#" class="nav-item">Dashboard</a>
+                                <a href="#" class="nav-item">Users</a>
+                                <a href="#" class="nav-item">Donatur</a>
+                                <a href="#" class="nav-item">Kunjungan</a>
+                                <a href="#" class="nav-item">Settings</a>
+                            </div>
+                        </div>
+                        <div class="new-main">
+                            <div class="demo-content">
+                                <div class="content-block">
+                                    <h4 class="font-semibold text-lg mb-2">Solusi:</h4>
+                                    <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                        <li>✅ Header tetap di atas (fixed position)</li>
+                                        <li>✅ Sidebar positioned di bawah header</li>
+                                        <li>✅ Navigation selalu accessible</li>
+                                        <li>✅ User experience lebih baik</li>
+                                    </ul>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 1</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Header tetap terlihat meskipun Anda scroll ke bawah.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 2</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Sidebar tidak menutupi header dan positioned dengan benar.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 3</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Navigation selalu dapat diakses dari header.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 4</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Layout yang clean dan professional.</p>
+                                </div>
+                                <div class="content-block">
+                                    <h4 class="font-semibold">Content Block 5</h4>
+                                    <p class="text-sm text-gray-600 mt-2">Header masih terlihat di sini! 🎉</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 p-3 bg-green-50 border border-green-200 rounded">
+                    <p class="text-sm text-green-700">✅ Header selalu terlihat, layout yang rapi dan professional</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Implementation Guide -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">📋 Cara Implementasi</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold text-blue-600 mb-2">1. Gunakan Template Baru</h3>
+                    <div class="bg-gray-50 p-3 rounded text-sm">
+                        <code>
+&lt;?php<br>
+$page_title = "Halaman - Fundraising System";<br>
+include 'layout-header.php';<br>
+?&gt;<br><br>
+&lt;!-- Konten halaman --&gt;<br>
+&lt;div class="space-y-6"&gt;<br>
+&nbsp;&nbsp;&lt;h1&gt;Judul Halaman&lt;/h1&gt;<br>
+&nbsp;&nbsp;&lt;!-- konten lainnya --&gt;<br>
+&lt;/div&gt;<br><br>
+&lt;?php include 'layout-footer.php'; ?&gt;
+                        </code>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-green-600 mb-2">2. File Template yang Dibuat</h3>
+                    <ul class="text-sm space-y-1">
+                        <li>✅ <code>layout-header.php</code> - Header + sidebar template</li>
+                        <li>✅ <code>layout-footer.php</code> - Footer + scripts template</li>
+                        <li>✅ <code>dashboard-new.php</code> - Contoh implementasi</li>
+                        <li>✅ <code>users-new.php</code> - Contoh halaman users</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Benefits -->
+        <div class="bg-blue-50 rounded-lg p-6">
+            <h2 class="text-xl font-semibold text-blue-900 mb-4">🎯 Keuntungan Template Baru</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded">
+                    <h3 class="font-semibold text-blue-700 mb-2">UX Improvement</h3>
+                    <ul class="text-sm space-y-1">
+                        <li>• Header selalu accessible</li>
+                        <li>• Navigation yang konsisten</li>
+                        <li>• Mobile responsive</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <h3 class="font-semibold text-green-700 mb-2">Developer Experience</h3>
+                    <ul class="text-sm space-y-1">
+                        <li>• Code reusability</li>
+                        <li>• Easy maintenance</li>
+                        <li>• Consistent structure</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-4 rounded">
+                    <h3 class="font-semibold text-purple-700 mb-2">Technical Benefits</h3>
+                    <ul class="text-sm space-y-1">
+                        <li>• Fixed positioning</li>
+                        <li>• Z-index management</li>
+                        <li>• Responsive design</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
