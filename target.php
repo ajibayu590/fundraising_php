@@ -1,18 +1,35 @@
 <?php
-$page_title = "Target & Goals - Fundraising System";
-include 'layout-header.php';
+session_start();
+
+// Periksa apakah user sudah login
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Koneksi ke database
+require_once 'config.php';
+
+// Ambil data user dari database
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt->bindParam(':id', $_SESSION['user_id']);
+$stmt->execute();
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Jika user tidak ditemukan, redirect ke login
+if (!$user) {
+    header("Location: login.php");
+    exit;
+}
 
 // Check access
-if (!in_array($user_role, ['admin', 'monitor'])) {
+if (!in_array($user['role'], ['admin', 'monitor'])) {
     header("Location: dashboard.php");
     exit;
 }
 
-// Database connection
-require_once 'config.php';
-
-// Handle global target updates (admin only)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user_role === 'admin') {
+// Handle global target updates (admin only) - BEFORE any output
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user['role'] === 'admin') {
     try {
         check_csrf();
         
@@ -33,6 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user_role === 'admin') {
         $error_message = "Error: " . $e->getMessage();
     }
 }
+
+// Tentukan sidebar berdasarkan role user
+$sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.php';
 
 // Load performance data
 try {
