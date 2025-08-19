@@ -67,14 +67,7 @@
                 <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mt-3 mb-2">System Management</h3>
             </div>
 
-            <!-- User Management (Admin & Monitor) -->
-            <a href="admin-users.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0121 12a11.955 11.955 0 01-1.382 5.618m0 0l-2.503-2.503M21 12H3"></path>
-                </svg>
-                Users
-                <span class="ml-auto bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">Admin</span>
-            </a>
+
 
             <!-- Analytics -->
             <a href="analytics-fixed.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
