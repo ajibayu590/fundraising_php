@@ -87,6 +87,7 @@ try {
     <title>Data Kunjungan Fundraiser</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/icon-fixes.css">
     <?php echo get_csrf_token_meta(); ?>
     
     <style>
@@ -206,7 +207,7 @@ try {
     <!-- Notification Container -->
     <div id="notification-container"></div>
 
-    	<div class="flex">
+    	    <div class="flex kunjungan-page">
         <!-- Sidebar -->
         <?php include $sidebarFile; ?>
     
@@ -277,13 +278,13 @@ try {
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2">
                     <button onclick="showKunjunganModal()" class="btn btn-primary">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                         </svg>
                         Tambah Kunjungan
                     </button>
                     <button onclick="exportToExcel()" class="btn btn-secondary">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
                         Export Excel
@@ -381,27 +382,27 @@ try {
     <!-- Bottom Navigation for Mobile -->
     <nav class="bottom-nav">
         <a href="dashboard.php" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
             </svg>
             Dashboard
         </a>
         <a href="kunjungan.php" class="bottom-nav-item active">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
             </svg>
             Kunjungan
         </a>
         <a href="donatur.php" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
             </svg>
             Donatur
         </a>
         <a href="analytics.php" class="bottom-nav-item">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="icon-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
             Analytics
@@ -414,7 +415,7 @@ try {
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg md:text-xl font-semibold">Tambah Kunjungan Fundraiser</h3>
                 <button onclick="hideKunjunganModal()" class="text-gray-400 hover:text-gray-600 p-2">
-                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="icon-md md:icon-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
@@ -495,5 +496,6 @@ try {
 	<script src="js/utils.js"></script>
 	<script src="js/kunjungan_api.js"></script>
 	<script src="js/mobile-menu.js"></script>
+	<script src="js/icon-fixes.js"></script>
 </body>
 </html>

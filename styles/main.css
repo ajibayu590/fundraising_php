@@ -1153,3 +1153,119 @@ body {
         }
     }
 } 
+
+/* CRITICAL ICON SIZE FIXES - Prevent icons from becoming too large */
+/* Force consistent icon sizes for all SVG elements */
+svg {
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* Specific icon size classes */
+.icon-xs {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+}
+
+.icon-sm {
+    width: 1rem !important;
+    height: 1rem !important;
+}
+
+.icon-md {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+.icon-lg {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+}
+
+.icon-xl {
+    width: 2rem !important;
+    height: 2rem !important;
+}
+
+/* Fix for button icons */
+.btn svg,
+button svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    flex-shrink: 0;
+}
+
+/* Fix for action button icons */
+.btn-primary svg,
+.btn-secondary svg {
+    width: 1rem !important;
+    height: 1rem !important;
+    margin-right: 0.5rem;
+}
+
+/* Fix for table action icons */
+table button svg {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+}
+
+/* Fix for modal icons */
+.modal svg,
+.modal-backdrop svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+}
+
+/* Fix for navigation icons */
+.bottom-nav-item svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    margin-bottom: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* Fix for sidebar icons */
+.sidebar svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    flex-shrink: 0;
+}
+
+/* Fix for header icons */
+header svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    flex-shrink: 0;
+}
+
+/* Prevent icon scaling on mobile */
+@media (max-width: 768px) {
+    svg {
+        width: auto !important;
+        height: auto !important;
+    }
+    
+    .btn svg,
+    button svg {
+        width: 1rem !important;
+        height: 1rem !important;
+    }
+    
+    .bottom-nav-item svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+    
+    .sidebar svg {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+    }
+}
+
+/* Override any conflicting Tailwind classes */
+.w-4.h-4 svg,
+.w-5.h-5 svg,
+.w-6.h-6 svg {
+    width: inherit !important;
+    height: inherit !important;
+} 
