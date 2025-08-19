@@ -71,6 +71,32 @@ try {
     $stmt->execute();
     $donaturList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // Handle Excel Export
+    if (!empty($_GET['export']) && $_GET['export'] === 'excel') {
+        $filename = 'kunjungan_' . date('Ymd_His') . '.xls';
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename=' . $filename);
+        
+        echo "<table border='1'>";
+        echo "<tr><th>ID</th><th>Fundraiser</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Catatan</th></tr>";
+        
+        foreach ($kunjunganData as $row) {
+            $id = htmlspecialchars($row['id']);
+            $fundraiser = htmlspecialchars($row['fundraiser_name'] ?? 'Unknown');
+            $donatur = htmlspecialchars($row['donatur_name'] ?? 'Unknown');
+            $hp = htmlspecialchars($row['donatur_hp'] ?? '');
+            $alamat = htmlspecialchars($row['alamat'] ?? '');
+            $status = htmlspecialchars($row['status'] ?? '');
+            $nominal = $row['status'] == 'berhasil' ? number_format($row['nominal'] ?? 0, 0, ',', '.') : '-';
+            $tanggal = date('d/m/Y H:i', strtotime($row['created_at']));
+            $catatan = htmlspecialchars($row['catatan'] ?? '');
+            
+            echo "<tr><td>$id</td><td>$fundraiser</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$catatan</td></tr>";
+        }
+        echo "</table>";
+        exit;
+    }
+    
 } catch (Exception $e) {
     $error_message = $e->getMessage();
 }

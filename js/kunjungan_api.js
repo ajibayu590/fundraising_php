@@ -354,19 +354,25 @@ function toggleStatusDependentFields() {
 
 // Export function
 function exportToExcel() {
-    // Get current URL with filters
-    const currentUrl = window.location.href;
-    const exportUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'export=excel';
-    
-    // Create temporary link and click it
-    const link = document.createElement('a');
-    link.href = exportUrl;
-    link.download = 'kunjungan_data.xlsx';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    Utils.showNotification('Export started', 'info');
+    try {
+        // Get current URL with filters
+        const currentUrl = window.location.href;
+        const exportUrl = currentUrl + (currentUrl.includes('?') ? '&' : '?') + 'export=excel';
+        
+        // Create temporary link and click it
+        const link = document.createElement('a');
+        link.href = exportUrl;
+        link.download = 'kunjungan_data.xls';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        Utils.showNotification('Export Excel berhasil dimulai', 'success');
+    } catch (error) {
+        console.error('Export error:', error);
+        Utils.showNotification('Gagal export Excel', 'error');
+    }
 }
 
 // Mobile menu toggle

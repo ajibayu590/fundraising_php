@@ -25,6 +25,32 @@ if (!$user) {
 // Tentukan sidebar berdasarkan role user
 $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.php';
 
+// Handle bulk update target
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $user['role'] === 'admin') {
+    try {
+        check_csrf();
+        
+        if (isset($_POST['bulk_update_target'])) {
+            $newTarget = (int)$_POST['bulk_target'];
+            
+            if ($newTarget > 0 && $newTarget <= 50) {
+                $stmt = $pdo->prepare("UPDATE users SET target = ? WHERE role = 'user'");
+                $stmt->execute([$newTarget]);
+                $affected = $stmt->rowCount();
+                
+                $success_message = "Target berhasil diupdate untuk $affected fundraiser";
+                header("Location: users.php?success=" . urlencode($success_message));
+                exit;
+            } else {
+                $error_message = "Target harus antara 1-50 kunjungan per hari";
+            }
+        }
+        
+    } catch (Exception $e) {
+        $error_message = "Error: " . $e->getMessage();
+    }
+}
+
 // HYBRID APPROACH: Load data directly with PHP for table display
 try {
 	$searchQuery = $_GET['search'] ?? '';
@@ -282,9 +308,15 @@ try {
 				<p class="text-gray-600 mt-2">Manajemen data fundraiser, target, dan performa</p>
 			</div>
 
+			<?php if (isset($_GET['success'])): ?>
+			<div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+				<strong>Success:</strong> <?php echo htmlspecialchars($_GET['success']); ?>
+			</div>
+			<?php endif; ?>
+
 			<?php if (isset($error_message)): ?>
 			<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-				<strong>Database Error:</strong> <?php echo htmlspecialchars($error_message); ?>
+				<strong>Error:</strong> <?php echo htmlspecialchars($error_message); ?>
 			</div>
 			<?php endif; ?>
 
@@ -341,17 +373,29 @@ try {
 				</form>
 			</div>
 
-			<!-- Actions -->
-			<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-				<div class="flex items-center space-x-2">
-					<h3 class="text-lg font-semibold text-gray-900">Daftar Fundraiser</h3>
-					<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><?php echo count($usersData ?? []); ?> records</span>
-				</div>
-				<div class="flex flex-col sm:flex-row gap-2">
-					<button onclick="bulkUpdateTarget()" class="btn btn-secondary">Update Target Massal</button>
-					<button onclick="showUserModal()" class="btn btn-primary">+ Tambah Fundraiser</button>
-				</div>
-			</div>
+			            <!-- Actions Panel - Moved to Top -->
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-lg font-semibold text-gray-900">Daftar Fundraiser</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full"><?php echo count($usersData ?? []); ?> records</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                        <button onclick="showBulkUpdateModal()" class="btn btn-secondary">
+                            <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                            Update Target Massal
+                        </button>
+                        <button onclick="showUserModal()" class="btn btn-primary">
+                            <svg class="icon-sm mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            + Tambah Fundraiser
+                        </button>
+                    </div>
+                </div>
+            </div>
 
 			<!-- Data Table -->
 			<div class="bg-white rounded-xl shadow-lg overflow-hidden">
@@ -449,6 +493,55 @@ try {
 		</a>
 	</nav>
 
+	<!-- Bulk Update Target Modal -->
+	<div id="bulk-update-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden items-center justify-center z-50 p-4">
+		<div class="bg-white rounded-xl p-6 w-full max-w-md">
+			<div class="flex justify-between items-center mb-4">
+				<h3 class="text-xl font-semibold">Update Target Massal</h3>
+				<button onclick="hideBulkUpdateModal()" class="text-gray-400 hover:text-gray-600">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+				</button>
+			</div>
+			
+			<form id="bulk-update-form" method="POST">
+				<?php echo get_csrf_token_field(); ?>
+				<input type="hidden" name="bulk_update_target" value="1">
+				
+				<div class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-2">Target Baru untuk Semua Fundraiser *</label>
+						<input type="number" id="bulk-target" name="bulk_target" min="1" max="50" value="8" 
+							   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+						<p class="mt-1 text-xs text-gray-500">Target kunjungan per hari (1-50) untuk semua fundraiser</p>
+					</div>
+					<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+						<div class="flex">
+							<svg class="w-5 h-5 text-yellow-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+							</svg>
+							<div class="text-sm text-yellow-700">
+								<strong>Peringatan:</strong> Aksi ini akan mengupdate target untuk semua fundraiser sekaligus.
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="flex justify-end space-x-3 mt-6">
+					<button type="button" onclick="hideBulkUpdateModal()" 
+							class="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+						Batal
+					</button>
+					<button type="submit" 
+							class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+						Update Semua Target
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
 	<!-- Enhanced Modal for Adding User -->
 	<div id="user-modal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop hidden items-center justify-center z-50 p-4">
 		<div class="bg-white rounded-xl p-6 w-full max-w-md">
@@ -506,11 +599,40 @@ try {
 	</div>
 
 	<script>
-		window.PHP_DATA = { csrfToken: '<?php echo generate_csrf_token(); ?>' };
+		window.PHP_DATA = { 
+			csrfToken: '<?php echo generate_csrf_token(); ?>',
+			users: <?php echo json_encode($usersData ?? []); ?>
+		};
+		
+		// Bulk Update Modal Functions
+		function showBulkUpdateModal() {
+			document.getElementById('bulk-update-modal').classList.remove('hidden');
+			document.getElementById('bulk-update-modal').classList.add('flex');
+		}
+		
+		function hideBulkUpdateModal() {
+			document.getElementById('bulk-update-modal').classList.add('hidden');
+			document.getElementById('bulk-update-modal').classList.remove('flex');
+			document.getElementById('bulk-update-form').reset();
+		}
+		
+		// Form submission handler for bulk update
+		document.addEventListener('DOMContentLoaded', function() {
+			const bulkForm = document.getElementById('bulk-update-form');
+			if (bulkForm) {
+				bulkForm.addEventListener('submit', function(e) {
+					const target = document.getElementById('bulk-target').value;
+					if (!confirm(`Apakah Anda yakin ingin mengupdate target semua fundraiser menjadi ${target} kunjungan per hari?`)) {
+						e.preventDefault();
+					}
+				});
+			}
+		});
 	</script>
 	<script src="js/config.js"></script>
 	<script src="js/utils.js"></script>
 	<script src="js/users_api.js"></script>
 	<script src="js/mobile-menu.js"></script>
+	<script src="js/icon-fixes.js"></script>
 </body>
 </html>
