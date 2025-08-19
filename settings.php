@@ -1,29 +1,65 @@
 <?php
 session_start();
 
-// Periksa apakah user sudah login
+// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
 
-// Koneksi ke database
+// Database connection
 require_once 'config.php';
 
-// Ambil data user dari database
+// Get user data
 $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
 $stmt->bindParam(':id', $_SESSION['user_id']);
 $stmt->execute();
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Jika user tidak ditemukan, redirect ke login
 if (!$user) {
+    session_destroy();
     header("Location: login.php");
     exit;
 }
 
-// Tentukan sidebar berdasarkan role user
-$sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.php';
+// Check if user has admin role
+if ($user['role'] !== 'admin') {
+    header("Location: dashboard.php");
+    exit;
+}
+
+// Include app settings
+require_once 'app_settings.php';
+
+// Handle form submissions
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        check_csrf();
+        
+        if (isset($_POST['update_settings'])) {
+            $new_version = trim($_POST['version']);
+            $new_copyright = trim($_POST['copyright']);
+            $new_company = trim($_POST['company']);
+            $new_description = trim($_POST['description']);
+            
+            // Update settings
+            update_app_setting('version', $new_version);
+            update_app_setting('copyright', $new_copyright);
+            update_app_setting('company', $new_company);
+            update_app_setting('description', $new_description);
+            
+            $success_message = "Pengaturan berhasil diupdate";
+            header("Location: settings.php?success=" . urlencode($success_message));
+            exit;
+        }
+        
+    } catch (Exception $e) {
+        $error_message = $e->getMessage();
+    }
+}
+
+// Determine sidebar
+$sidebarFile = 'sidebar-admin.php';
 ?>
 
 <!DOCTYPE html>
@@ -31,13 +67,13 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengaturan Sistem</title>
+    <title>Settings - Fundraising System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/icon-fixes.css">
     <?php echo get_csrf_token_meta(); ?>
     
     <style>
-        /* FINAL HEADER FIX - SIMPLE & EFFECTIVE */
         body {
             margin: 0 !important;
             padding: 0 !important;
@@ -48,75 +84,36 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
             top: 0 !important;
             left: 0 !important;
             right: 0 !important;
-            z-index: 1000 !important;
+            z-index: 50 !important;
             background: white !important;
-            width: 100% !important;
-            height: 64px !important;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-            border-bottom: 1px solid #e5e7eb !important;
         }
         
         .sidebar {
-            z-index: 500 !important;
             position: fixed !important;
             top: 64px !important;
             left: 0 !important;
-            width: 16rem !important;
             height: calc(100vh - 64px) !important;
+            width: 16rem !important;
+            z-index: 40 !important;
             background: white !important;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.1) !important;
-            overflow-y: auto !important;
+            transform: translateX(0) !important;
         }
         
         .main-content {
             margin-left: 16rem !important;
             margin-top: 64px !important;
-            padding: 2rem !important;
-            width: calc(100% - 16rem) !important;
             min-height: calc(100vh - 64px) !important;
+            width: calc(100% - 16rem) !important;
         }
         
         @media (max-width: 768px) {
-            header {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
-                z-index: 99999 !important;
-            }
-            
-            .mobile-menu-btn {
-                display: flex !important;
-                position: fixed !important;
-                top: 1rem !important;
-                left: 1rem !important;
-                z-index: 999999 !important;
-                background: white !important;
-                border-radius: 0.5rem !important;
-                padding: 0.5rem !important;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
-            }
-            
             .sidebar {
                 transform: translateX(-100%) !important;
-                padding-top: 5rem !important;
-            }
-            
-            .sidebar.mobile-open {
-                transform: translateX(0) !important;
             }
             
             .main-content {
                 margin-left: 0 !important;
-                padding: 1rem !important;
-                padding-top: 6rem !important;
                 width: 100% !important;
-            }
-        }
-        
-        @media (min-width: 769px) {
-            .mobile-menu-btn {
-                display: none !important;
             }
         }
     </style>
@@ -129,117 +126,183 @@ $sidebarFile = ($user['role'] == 'admin') ? 'sidebar-admin.php' : 'sidebar-user.
         </svg>
     </button>
 
-    <!-- Sidebar Overlay -->
-    <div id="sidebar-overlay" class="sidebar-overlay"></div>
-
-    <!-- Notification Container -->
-    <div id="notification-container"></div>
-
     <!-- Header -->
     <header class="bg-white shadow-sm border-b">
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center" style="height: 64px !important;">
                 <div class="flex items-center">
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 ml-12 md:ml-0">Pengaturan Sistem</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 ml-12 md:ml-0">Settings</h1>
                 </div>
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <span class="text-xs md:text-sm text-gray-700 hidden sm:block">Welcome, <?php echo htmlspecialchars($user['name']); ?></span>
-                    <span class="inline-flex items-center px-2 py-1 md:px-2.5 md:py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"><?php echo ucfirst($user['role']); ?></span>
-                    <a href="logout.php" class="text-xs md:text-sm text-red-600 hover:text-red-800 transition-colors">Logout</a>
+                    <span class="inline-flex items-center px-2 py-1 md:px-2.5 md:py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Admin</span>
+                    <a href="logout.php" class="text-xs md:text-sm text-red-600 hover:text-red-800">Logout</a>
                 </div>
             </div>
         </div>
     </header>
 
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
     <div class="flex">
         <!-- Sidebar -->
         <?php include $sidebarFile; ?>
-    
-        <!-- Main Content -->
-        <div class="main-content p-4 md:p-8">
-        <div class="mb-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Pengaturan Sistem</h2>
-            <p class="text-gray-600 mt-2">Konfigurasi sistem dan preferensi aplikasi</p>
-        </div>
         
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4">Pengaturan Umum</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama Organisasi</label>
-                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="Yayasan Fundraising Indonesia" id="org-name">
+        <div class="main-content flex-1 p-4 md:p-8">
+            <div class="mb-6 md:mb-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Application Settings</h2>
+                <p class="text-gray-600 mt-2">Kelola pengaturan aplikasi</p>
+            </div>
+
+            <?php if (isset($_GET['success'])): ?>
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                <strong>Success:</strong> <?php echo htmlspecialchars($_GET['success']); ?>
+            </div>
+            <?php endif; ?>
+
+            <?php if (isset($error_message)): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                <strong>Error:</strong> <?php echo htmlspecialchars($error_message); ?>
+            </div>
+            <?php endif; ?>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Application Settings -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">⚙️ Pengaturan Aplikasi</h3>
+                    
+                    <form method="POST" class="space-y-4">
+                        <?php echo get_csrf_token_field(); ?>
+                        <input type="hidden" name="update_settings" value="1">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nama Perusahaan</label>
+                            <input type="text" name="company" value="<?php echo htmlspecialchars(get_app_setting('company')); ?>" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Aplikasi</label>
+                            <textarea name="description" rows="3" required 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars(get_app_setting('description')); ?></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Versi Aplikasi</label>
+                            <input type="text" name="version" value="<?php echo htmlspecialchars(get_app_setting('version')); ?>" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Format: x.x.x (contoh: 1.0.0)</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Copyright Text</label>
+                            <input type="text" name="copyright" value="<?php echo htmlspecialchars(get_app_setting('copyright')); ?>" required 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Contoh: © 2024 Fundraising System. All rights reserved.</p>
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Update Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Current Settings Preview -->
+                <div class="space-y-6">
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">👁️ Preview Settings</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-500">Nama Perusahaan</p>
+                                <p class="font-medium"><?php echo htmlspecialchars(get_app_setting('company')); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Deskripsi</p>
+                                <p class="font-medium"><?php echo htmlspecialchars(get_app_setting('description')); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Versi</p>
+                                <p class="font-medium"><?php echo htmlspecialchars(get_app_setting('version')); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Copyright</p>
+                                <p class="font-medium"><?php echo htmlspecialchars(get_app_setting('copyright')); ?></p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Zona Waktu</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" id="timezone">
-                            <option value="WIB">WIB (UTC+7)</option>
-                            <option value="WITA">WITA (UTC+8)</option>
-                            <option value="WIT">WIT (UTC+9)</option>
-                        </select>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Informasi Sistem</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <p class="text-sm text-gray-500">PHP Version</p>
+                                <p class="font-medium"><?php echo PHP_VERSION; ?></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Database</p>
+                                <p class="font-medium">MySQL</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Server</p>
+                                <p class="font-medium"><?php echo $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'; ?></p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500">Last Updated</p>
+                                <p class="font-medium"><?php echo date('d/m/Y H:i:s'); ?></p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Format Mata Uang</label>
-                        <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" id="currency-format">
-                            <option value="IDR">Rupiah (Rp)</option>
-                            <option value="USD">Dollar ($)</option>
-                        </select>
-                    </div>
-                    <button onclick="saveSettings()" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors">
-                        Simpan Pengaturan
-                    </button>
                 </div>
             </div>
-            
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4">Notifikasi</h3>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Email Laporan Harian</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Notifikasi Target Tercapai</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Alert Kunjungan Rendah</span>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                        </label>
-                    </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow p-6 mt-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">⚡ Quick Actions</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="dashboard.php" class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v6H8V5z"></path>
+                        </svg>
+                        Dashboard
+                    </a>
+                    
+                    <a href="users.php" class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        User Management
+                    </a>
+                    
+                    <a href="analytics-fixed.php" class="inline-flex items-center justify-center px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Analytics
+                    </a>
                 </div>
-            </div>
-        </div>
-        
-        <div class="mt-6 bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-xl font-semibold mb-4">Backup & Restore</h3>
-            <div class="flex flex-wrap gap-4">
-                <button onclick="backupData()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm">
-                    Backup Data
-                </button>
-                <button onclick="restoreData()" class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition-colors text-sm">
-                    Restore Data
-                </button>
-                <button onclick="resetSystem()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm">
-                    Reset Sistem
-                </button>
             </div>
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/mobile-menu.js"></script>
+    <script>
+        // Mobile menu toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function() {
+                    const sidebar = document.querySelector('.sidebar');
+                    if (sidebar) {
+                        sidebar.classList.toggle('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <script src="js/icon-fixes.js"></script>
 </body>
 </html>

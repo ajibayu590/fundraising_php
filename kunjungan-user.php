@@ -42,12 +42,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $nominal = $status === 'berhasil' ? (int)$_POST['nominal'] : 0;
             $catatan = $_POST['catatan'];
             
-            $stmt = $pdo->prepare("INSERT INTO kunjungan (fundraiser_id, donatur_id, status, nominal, catatan) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$user['id'], $donatur_id, $status, $nominal, $catatan]);
+            // Handle file upload for foto
+            $foto_path = null;
+            if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/kunjungan/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $file_extension = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+                $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif'];
+                
+                if (in_array($file_extension, $allowed_extensions)) {
+                    $foto_filename = 'kunjungan_' . $user['id'] . '_' . date('Ymd_His') . '.' . $file_extension;
+                    $foto_path = $upload_dir . $foto_filename;
+                    
+                    if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_path)) {
+                        // File uploaded successfully
+                    } else {
+                        $error_message = "Gagal mengupload foto";
+                    }
+                } else {
+                    $error_message = "Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF";
+                }
+            }
             
-            $success_message = "Kunjungan berhasil ditambahkan";
-            header("Location: kunjungan-user.php?success=" . urlencode($success_message));
-            exit;
+            if (!isset($error_message)) {
+                $stmt = $pdo->prepare("INSERT INTO kunjungan (fundraiser_id, donatur_id, status, nominal, catatan, foto) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$user['id'], $donatur_id, $status, $nominal, $catatan, $foto_path]);
+                
+                $success_message = "Kunjungan berhasil ditambahkan";
+                header("Location: kunjungan-user.php?success=" . urlencode($success_message));
+                exit;
+            }
         }
         
         if (isset($_POST['edit_kunjungan'])) {
@@ -113,7 +140,7 @@ if (!empty($_GET['export']) && $_GET['export'] === 'excel') {
     $exportData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo "<table border='1'>";
-    echo "<tr><th>ID</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Catatan</th></tr>";
+    echo "<tr><th>ID</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Foto</th><th>Catatan</th></tr>";
     
     foreach ($exportData as $row) {
         $id = htmlspecialchars($row['id']);
@@ -123,9 +150,10 @@ if (!empty($_GET['export']) && $_GET['export'] === 'excel') {
         $status = htmlspecialchars($row['status'] ?? '');
         $nominal = $row['status'] == 'berhasil' ? number_format($row['nominal'] ?? 0, 0, ',', '.') : '-';
         $tanggal = date('d/m/Y H:i', strtotime($row['created_at']));
+        $foto = $row['foto'] ? 'Ada' : 'Tidak ada';
         $catatan = htmlspecialchars($row['catatan'] ?? '');
         
-        echo "<tr><td>$id</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$catatan</td></tr>";
+        echo "<tr><td>$id</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$foto</td><td>$catatan</td></tr>";
     }
     echo "</table>";
     exit;
@@ -401,6 +429,7 @@ try {
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Donatur</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Foto</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
@@ -430,6 +459,18 @@ try {
                                         Rp <?php echo number_format($kunjungan['nominal'], 0, ',', '.'); ?>
                                     <?php else: ?>
                                         -
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php if ($kunjungan['foto']): ?>
+                                        <a href="<?php echo htmlspecialchars($kunjungan['foto']); ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            Lihat Foto
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-gray-400">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -465,13 +506,13 @@ try {
         <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
             <div class="mt-3">
                 <h3 class="text-lg font-medium text-gray-900 mb-4" id="modalTitle">Tambah Kunjungan</h3>
-                <form id="kunjunganForm" method="POST">
+                <form id="kunjunganForm" method="POST" enctype="multipart/form-data">
                     <?php echo get_csrf_token_field(); ?>
                     <input type="hidden" id="kunjungan_id" name="kunjungan_id">
                     <input type="hidden" id="form_action" name="add_kunjungan">
                     
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Donatur</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Donatur <span class="text-red-500">*</span></label>
                         <select id="donatur_id" name="donatur_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Pilih Donatur</option>
                             <?php foreach ($donaturList as $donatur): ?>
@@ -483,7 +524,7 @@ try {
                     </div>
                     
                     <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
                         <select id="status" name="status" required onchange="toggleNominalField()" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Pilih Status</option>
                             <option value="berhasil">Berhasil</option>
@@ -493,8 +534,14 @@ try {
                     </div>
                     
                     <div class="mb-4" id="nominalField" style="display: none;">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Donasi</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Donasi <span class="text-red-500">*</span></label>
                         <input type="number" id="nominal" name="nominal" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Foto Kunjungan <span class="text-red-500">*</span></label>
+                        <input type="file" id="foto" name="foto" accept="image/*" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Format: JPG, JPEG, PNG, GIF. Maksimal 5MB</p>
                     </div>
                     
                     <div class="mb-4">
@@ -620,6 +667,55 @@ try {
                 nominal.value = '';
             }
         }
+
+        // Form validation
+        document.getElementById('kunjunganForm').addEventListener('submit', function(e) {
+            const donatur = document.getElementById('donatur_id').value;
+            const status = document.getElementById('status').value;
+            const foto = document.getElementById('foto').files[0];
+            
+            if (!donatur) {
+                e.preventDefault();
+                alert('Pilih donatur terlebih dahulu');
+                return false;
+            }
+            
+            if (!status) {
+                e.preventDefault();
+                alert('Pilih status terlebih dahulu');
+                return false;
+            }
+            
+            if (status === 'berhasil') {
+                const nominal = document.getElementById('nominal').value;
+                if (!nominal || nominal <= 0) {
+                    e.preventDefault();
+                    alert('Masukkan nominal donasi yang valid');
+                    return false;
+                }
+            }
+            
+            if (!foto) {
+                e.preventDefault();
+                alert('Upload foto kunjungan terlebih dahulu');
+                return false;
+            }
+            
+            // Check file size (5MB limit)
+            if (foto.size > 5 * 1024 * 1024) {
+                e.preventDefault();
+                alert('Ukuran foto maksimal 5MB');
+                return false;
+            }
+            
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+            if (!allowedTypes.includes(foto.type)) {
+                e.preventDefault();
+                alert('Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF');
+                return false;
+            }
+        });
 
         function exportToExcel() {
             try {

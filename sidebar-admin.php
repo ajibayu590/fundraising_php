@@ -87,4 +87,19 @@
             </a>
         </div>
     </nav>
+    
+    <!-- Copyright & Version -->
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
+        <div class="text-center">
+            <p class="text-xs text-gray-500 mb-1">
+                <?php 
+                require_once 'app_settings.php';
+                echo get_app_setting('copyright'); 
+                ?>
+            </p>
+            <p class="text-xs text-gray-400">
+                Version <?php echo get_app_setting('version'); ?>
+            </p>
+        </div>
+    </div>
 </aside>
