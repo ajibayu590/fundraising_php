@@ -91,6 +91,15 @@
                 Analytics
             </a>
 
+            <!-- WhatsApp Manager -->
+            <a href="whatsapp-manager.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+                WhatsApp Manager
+                <span class="ml-auto bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">New</span>
+            </a>
+
             <!-- Settings -->
             <a href="settings.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
