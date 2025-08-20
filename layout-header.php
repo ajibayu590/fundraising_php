@@ -250,8 +250,15 @@ $page_title = $page_title ?? 'Fundraising System';
     <!-- Fixed Header -->
     <header class="fixed-header bg-white">
         <div class="header-content">
-            <div class="header-title">
-                Fundraising System
+            <!-- Logo and Title Section -->
+            <div class="flex items-center">
+                <?php 
+                require_once 'logo_manager.php';
+                echo get_logo_html('w-10 h-10', 'mr-3'); 
+                ?>
+                <div class="header-title">
+                    Fundraising System
+                </div>
             </div>
             <div class="header-user-info">
                 <span class="welcome-text text-sm text-gray-700">Welcome, <?php echo htmlspecialchars($user_name); ?></span>

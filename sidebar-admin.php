@@ -1,5 +1,19 @@
 <!-- Sidebar for Admin & Monitor - Enhanced with separated sections -->
 <aside id="sidebar" class="sidebar bg-white shadow-lg min-h-screen">
+    <!-- Logo Section -->
+    <div class="px-4 py-6 border-b border-gray-200">
+        <div class="flex items-center justify-center">
+            <?php 
+            require_once 'logo_manager.php';
+            echo get_logo_html('w-12 h-12', 'mr-3'); 
+            ?>
+            <div>
+                <h1 class="text-lg font-bold text-gray-900">Fundraising</h1>
+                <p class="text-xs text-gray-500">Management System</p>
+            </div>
+        </div>
+    </div>
+    
     <nav class="mt-4">
         <div class="px-4 space-y-1">
             <!-- Dashboard -->

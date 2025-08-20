@@ -30,6 +30,7 @@ if ($user['role'] !== 'admin') {
 
 // Include app settings
 require_once 'app_settings.php';
+require_once 'logo_manager.php';
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,6 +50,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             update_app_setting('description', $new_description);
             
             $success_message = "Pengaturan berhasil diupdate";
+            header("Location: settings.php?success=" . urlencode($success_message));
+            exit;
+        }
+        
+        // Handle logo upload
+        if (isset($_POST['upload_logo']) && isset($_FILES['logo'])) {
+            $result = upload_logo($_FILES['logo']);
+            if ($result['success']) {
+                $success_message = $result['message'];
+            } else {
+                $error_message = $result['message'];
+            }
+            header("Location: settings.php?success=" . urlencode($success_message ?? '') . "&error=" . urlencode($error_message ?? ''));
+            exit;
+        }
+        
+        // Handle logo deletion
+        if (isset($_POST['delete_logo'])) {
+            $result = delete_logo();
+            $success_message = $result['message'];
             header("Location: settings.php?success=" . urlencode($success_message));
             exit;
         }
@@ -194,6 +215,49 @@ $sidebarFile = 'sidebar-admin.php';
                 <strong>Error:</strong> <?php echo htmlspecialchars($error_message); ?>
             </div>
             <?php endif; ?>
+
+            <!-- Logo Management Section -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">🖼️ Logo Management</h3>
+                
+                <!-- Current Logo Display -->
+                <div class="mb-6">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">Current Logo</h4>
+                    <div class="flex items-center space-x-4">
+                        <?php echo get_logo_html('w-16 h-16', 'rounded-lg'); ?>
+                        <div>
+                            <p class="text-sm text-gray-600">
+                                <?php echo get_logo_path() ? 'Logo uploaded' : 'No logo uploaded (using default)'; ?>
+                            </p>
+                            <?php if (get_logo_path()): ?>
+                            <form method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete the current logo?')">
+                                <?php echo get_csrf_token_field(); ?>
+                                <button type="submit" name="delete_logo" class="text-red-600 hover:text-red-800 text-sm">
+                                    Delete Logo
+                                </button>
+                            </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logo Upload Form -->
+                <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <?php echo get_csrf_token_field(); ?>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload New Logo</label>
+                        <input type="file" name="logo" accept="image/png,image/jpeg,image/jpg" required 
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Format: PNG, JPEG. Max size: 2MB</p>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" name="upload_logo" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            Upload Logo
+                        </button>
+                    </div>
+                </form>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Application Settings -->
