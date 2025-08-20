@@ -67,9 +67,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
+            // Handle GPS data
+            $latitude = null;
+            $longitude = null;
+            $location_address = null;
+            
+            if (isset($_POST['latitude']) && isset($_POST['longitude']) && 
+                !empty($_POST['latitude']) && !empty($_POST['longitude'])) {
+                $latitude = (float)$_POST['latitude'];
+                $longitude = (float)$_POST['longitude'];
+                $location_address = $_POST['location_address'] ?? null;
+                
+                // Validate GPS coordinates
+                if ($latitude < -90 || $latitude > 90 || $longitude < -180 || $longitude > 180) {
+                    $error_message = "Koordinat GPS tidak valid";
+                }
+            }
+            
             if (!isset($error_message)) {
-                $stmt = $pdo->prepare("INSERT INTO kunjungan (fundraiser_id, donatur_id, status, nominal, catatan, foto) VALUES (?, ?, ?, ?, ?, ?)");
-                $stmt->execute([$user['id'], $donatur_id, $status, $nominal, $catatan, $foto_path]);
+                $stmt = $pdo->prepare("INSERT INTO kunjungan (fundraiser_id, donatur_id, status, nominal, catatan, foto, latitude, longitude, location_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$user['id'], $donatur_id, $status, $nominal, $catatan, $foto_path, $latitude, $longitude, $location_address]);
                 
                 $success_message = "Kunjungan berhasil ditambahkan";
                 header("Location: kunjungan-user.php?success=" . urlencode($success_message));
@@ -430,6 +447,7 @@ try {
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nominal</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Foto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lokasi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
@@ -469,6 +487,22 @@ try {
                                             </svg>
                                             Lihat Foto
                                         </a>
+                                    <?php else: ?>
+                                        <span class="text-gray-400">-</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <?php if ($kunjungan['latitude'] && $kunjungan['longitude']): ?>
+                                        <a href="https://maps.google.com/?q=<?php echo $kunjungan['latitude']; ?>,<?php echo $kunjungan['longitude']; ?>" target="_blank" class="text-green-600 hover:text-green-800">
+                                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            </svg>
+                                            Lihat Lokasi
+                                        </a>
+                                        <?php if ($kunjungan['location_address']): ?>
+                                            <br><span class="text-xs text-gray-500"><?php echo htmlspecialchars(substr($kunjungan['location_address'], 0, 30)) . (strlen($kunjungan['location_address']) > 30 ? '...' : ''); ?></span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-gray-400">-</span>
                                     <?php endif; ?>
@@ -542,6 +576,50 @@ try {
                         <label class="block text-sm font-medium text-gray-700 mb-2">Foto Kunjungan <span class="text-red-500">*</span></label>
                         <input type="file" id="foto" name="foto" accept="image/*" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <p class="text-xs text-gray-500 mt-1">Format: JPG, JPEG, PNG, GIF. Maksimal 5MB</p>
+                    </div>
+                    
+                    <!-- GPS Location Section -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Lokasi GPS <span class="text-red-500">*</span></label>
+                        <div class="space-y-3">
+                            <div class="flex space-x-2">
+                                <button type="button" id="getLocationBtn" class="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors">
+                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    Ambil Lokasi GPS
+                                </button>
+                                <span id="locationStatus" class="text-sm text-gray-500"></span>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Latitude</label>
+                                    <input type="number" id="latitude" name="latitude" step="any" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                           placeholder="Contoh: -6.2088">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-600 mb-1">Longitude</label>
+                                    <input type="number" id="longitude" name="longitude" step="any" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                           placeholder="Contoh: 106.8456">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Alamat Lokasi</label>
+                                <input type="text" id="location_address" name="location_address" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                       placeholder="Alamat lengkap lokasi kunjungan">
+                            </div>
+                            
+                            <div id="mapPreview" class="hidden">
+                                <label class="block text-xs text-gray-600 mb-1">Preview Lokasi</label>
+                                <div id="map" class="w-full h-32 bg-gray-100 rounded-lg border"></div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="mb-4">
