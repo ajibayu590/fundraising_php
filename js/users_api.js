@@ -12,6 +12,7 @@ const UsersAPI = {
 					'Content-Type': 'application/json',
 					'X-CSRF-Token': window.PHP_DATA.csrfToken
 				},
+				credentials: 'same-origin',
 				body: JSON.stringify(formData)
 			});
 			const result = await res.json();
@@ -38,6 +39,7 @@ const UsersAPI = {
 					'Content-Type': 'application/json',
 					'X-CSRF-Token': window.PHP_DATA.csrfToken
 				},
+				credentials: 'same-origin',
 				body: JSON.stringify({ id, ...updates })
 			});
 			const result = await res.json();
@@ -61,7 +63,8 @@ const UsersAPI = {
 		try {
 			const res = await fetch(`api/users_crud.php?id=${id}`, {
 				method: 'DELETE',
-				headers: { 'X-CSRF-Token': window.PHP_DATA.csrfToken }
+				headers: { 'X-CSRF-Token': window.PHP_DATA.csrfToken },
+				credentials: 'same-origin'
 			});
 			const result = await res.json();
 			if (result.success) {
@@ -80,7 +83,7 @@ const UsersAPI = {
 
 	async getUser(id) {
 		try {
-			const res = await fetch(`api/users_crud.php?id=${id}`);
+			const res = await fetch(`api/users_crud.php?id=${id}`, { credentials: 'same-origin' });
 			const result = await res.json();
 			if (result.success) return result.data;
 			Utils.showNotification(result.message, 'error');

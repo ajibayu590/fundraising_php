@@ -7,18 +7,8 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Database connection
-$host = 'localhost';
-$database = 'fundraising_db';
-$username = 'root';
-$password = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$database", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
-}
+// Use centralized database config and security helpers
+require_once __DIR__ . '/config.php';
 
 $error = '';
 
@@ -54,10 +44,6 @@ if (count($_SESSION['login_attempts']) >= 5) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_name'] = $user['name'];
-                
-                // Update last active
-                $stmt = $pdo->prepare("UPDATE users SET last_active = NOW() WHERE id = ?");
-                $stmt->execute([$user['id']]);
                 
                 // Redirect based on role
                 if ($user['role'] === 'user') {
