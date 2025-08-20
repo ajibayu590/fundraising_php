@@ -157,7 +157,7 @@ if (!empty($_GET['export']) && $_GET['export'] === 'excel') {
     $exportData = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     echo "<table border='1'>";
-    echo "<tr><th>ID</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Foto</th><th>Catatan</th></tr>";
+    echo "<tr><th>ID</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Foto</th><th>Latitude</th><th>Longitude</th><th>Lokasi</th><th>Catatan</th></tr>";
     
     foreach ($exportData as $row) {
         $id = htmlspecialchars($row['id']);
@@ -168,9 +168,12 @@ if (!empty($_GET['export']) && $_GET['export'] === 'excel') {
         $nominal = $row['status'] == 'berhasil' ? number_format($row['nominal'] ?? 0, 0, ',', '.') : '-';
         $tanggal = date('d/m/Y H:i', strtotime($row['created_at']));
         $foto = $row['foto'] ? 'Ada' : 'Tidak ada';
+        $latitude = $row['latitude'] ?? '-';
+        $longitude = $row['longitude'] ?? '-';
+        $lokasi = htmlspecialchars($row['location_address'] ?? '-');
         $catatan = htmlspecialchars($row['catatan'] ?? '');
         
-        echo "<tr><td>$id</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$foto</td><td>$catatan</td></tr>";
+        echo "<tr><td>$id</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$foto</td><td>$latitude</td><td>$longitude</td><td>$lokasi</td><td>$catatan</td></tr>";
     }
     echo "</table>";
     exit;
@@ -746,11 +749,110 @@ try {
             }
         }
 
+        // GPS Location Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const getLocationBtn = document.getElementById('getLocationBtn');
+            const locationStatus = document.getElementById('locationStatus');
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const locationAddressInput = document.getElementById('location_address');
+            const mapPreview = document.getElementById('mapPreview');
+            
+            if (getLocationBtn) {
+                getLocationBtn.addEventListener('click', function() {
+                    if (navigator.geolocation) {
+                        locationStatus.textContent = 'Mengambil lokasi...';
+                        locationStatus.className = 'text-sm text-blue-500';
+                        
+                        navigator.geolocation.getCurrentPosition(
+                            function(position) {
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
+                                
+                                latitudeInput.value = lat.toFixed(6);
+                                longitudeInput.value = lng.toFixed(6);
+                                
+                                locationStatus.textContent = 'Lokasi berhasil diambil!';
+                                locationStatus.className = 'text-sm text-green-500';
+                                
+                                // Show map preview
+                                mapPreview.classList.remove('hidden');
+                                
+                                // Get address from coordinates (reverse geocoding)
+                                getAddressFromCoordinates(lat, lng);
+                            },
+                            function(error) {
+                                let errorMessage = 'Gagal mengambil lokasi';
+                                switch(error.code) {
+                                    case error.PERMISSION_DENIED:
+                                        errorMessage = 'Izin lokasi ditolak. Silakan izinkan akses lokasi.';
+                                        break;
+                                    case error.POSITION_UNAVAILABLE:
+                                        errorMessage = 'Informasi lokasi tidak tersedia.';
+                                        break;
+                                    case error.TIMEOUT:
+                                        errorMessage = 'Waktu tunggu habis.';
+                                        break;
+                                }
+                                locationStatus.textContent = errorMessage;
+                                locationStatus.className = 'text-sm text-red-500';
+                            },
+                            {
+                                enableHighAccuracy: true,
+                                timeout: 10000,
+                                maximumAge: 60000
+                            }
+                        );
+                    } else {
+                        locationStatus.textContent = 'Geolokasi tidak didukung oleh browser ini.';
+                        locationStatus.className = 'text-sm text-red-500';
+                    }
+                });
+            }
+            
+            // Function to get address from coordinates
+            function getAddressFromCoordinates(lat, lng) {
+                // Using OpenStreetMap Nominatim API for reverse geocoding
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.display_name) {
+                            locationAddressInput.value = data.display_name;
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Error getting address:', error);
+                    });
+            }
+            
+            // Manual GPS coordinate validation
+            latitudeInput.addEventListener('input', validateGPS);
+            longitudeInput.addEventListener('input', validateGPS);
+            
+            function validateGPS() {
+                const lat = parseFloat(latitudeInput.value);
+                const lng = parseFloat(longitudeInput.value);
+                
+                if (latitudeInput.value && longitudeInput.value) {
+                    if (lat < -90 || lat > 90) {
+                        latitudeInput.setCustomValidity('Latitude harus antara -90 dan 90');
+                    } else if (lng < -180 || lng > 180) {
+                        longitudeInput.setCustomValidity('Longitude harus antara -180 dan 180');
+                    } else {
+                        latitudeInput.setCustomValidity('');
+                        longitudeInput.setCustomValidity('');
+                    }
+                }
+            }
+        });
+
         // Form validation
         document.getElementById('kunjunganForm').addEventListener('submit', function(e) {
             const donatur = document.getElementById('donatur_id').value;
             const status = document.getElementById('status').value;
             const foto = document.getElementById('foto').files[0];
+            const latitude = document.getElementById('latitude').value;
+            const longitude = document.getElementById('longitude').value;
             
             if (!donatur) {
                 e.preventDefault();
@@ -779,6 +881,12 @@ try {
                 return false;
             }
             
+            if (!latitude || !longitude) {
+                e.preventDefault();
+                alert('Ambil lokasi GPS terlebih dahulu');
+                return false;
+            }
+            
             // Check file size (5MB limit)
             if (foto.size > 5 * 1024 * 1024) {
                 e.preventDefault();
@@ -791,6 +899,15 @@ try {
             if (!allowedTypes.includes(foto.type)) {
                 e.preventDefault();
                 alert('Format file tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF');
+                return false;
+            }
+            
+            // Validate GPS coordinates
+            const lat = parseFloat(latitude);
+            const lng = parseFloat(longitude);
+            if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                e.preventDefault();
+                alert('Koordinat GPS tidak valid');
                 return false;
             }
         });
