@@ -161,11 +161,11 @@ try {
     
     println("Created tables from database_complete.sql");
 
-    // -------- Seed admin with provided password --------
-    $adminHash = password_hash($adminPass, PASSWORD_BCRYPT);
-    $stmt = $pdo->prepare("UPDATE `users` SET `password` = ? WHERE `username` = 'admin'");
-    $stmt->execute([$adminHash]);
-    println("Updated admin password: username=admin");
+    // -------- Update all user passwords with provided password --------
+    $userHash = password_hash($adminPass, PASSWORD_BCRYPT);
+    $stmt = $pdo->prepare("UPDATE `users` SET `password` = ?");
+    $stmt->execute([$userHash]);
+    println("Updated all user passwords with provided password");
 
     // -------- Ensure upload directory --------
     $uploadDir = __DIR__ . '/uploads/kunjungan';

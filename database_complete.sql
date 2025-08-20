@@ -56,7 +56,7 @@ CREATE TABLE `donatur` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ========================================
--- 3. KUNJUNGAN TABLE (with GPS and Photo)
+-- 3. KUNJUNGAN TABLE (with GPS coordinates)
 -- ========================================
 CREATE TABLE `kunjungan` (
     `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -107,10 +107,58 @@ CREATE TABLE `settings` (
 INSERT INTO `users` (`name`,`email`,`username`,`password`,`role`,`status`,`target`) VALUES
 ('Administrator','admin@example.com','admin','__BCRYPT_ADMIN__','admin','active',8);
 
+-- Seed sample fundraisers (replace __BCRYPT_USER__ with actual hash)
+INSERT INTO `users` (`name`,`email`,`username`,`password`,`role`,`status`,`target`) VALUES
+('Ahmad Rizki Pratama','ahmad.rizki@fundraising.com','ahmad','__BCRYPT_USER__','user','active',8),
+('Siti Nurhaliza Dewi','siti.nurhaliza@fundraising.com','siti','__BCRYPT_USER__','user','active',8),
+('Budi Santoso Wijaya','budi.santoso@fundraising.com','budi','__BCRYPT_USER__','user','active',8),
+('Dewi Sartika Putri','dewi.sartika@fundraising.com','dewi','__BCRYPT_USER__','user','active',8),
+('Muhammad Fajar Sidiq','fajar.sidiq@fundraising.com','fajar','__BCRYPT_USER__','user','active',8),
+('Rina Kartika Sari','rina.kartika@fundraising.com','rina','__BCRYPT_USER__','user','active',8),
+('Monitor User','monitor@fundraising.com','monitor','__BCRYPT_USER__','monitor','active',0);
+
+-- Seed sample donatur
+INSERT INTO `donatur` (`nama`,`hp`,`alamat`) VALUES
+('Pak Joko Widodo Santoso','081234567801','Jl. Sudirman No. 123, Jakarta Pusat'),
+('PT. Maju Bersama Indonesia','021-1234-5678','Jl. Thamrin No. 45, Jakarta Pusat'),
+('Ibu Siti Aminah','081234567802','Jl. Gatot Subroto No. 67, Jakarta Selatan'),
+('Yayasan Peduli Bangsa','021-9876-5432','Jl. Rasuna Said No. 89, Jakarta Selatan'),
+('Bapak Ahmad Hidayat','081234567803','Jl. Kuningan No. 12, Jakarta Selatan'),
+('PT. Bumi Sejahtera','021-5555-1234','Jl. Sudirman No. 456, Jakarta Pusat'),
+('Ibu Kartika Sari','081234567804','Jl. Menteng Raya No. 78, Jakarta Pusat'),
+('Bapak Bambang Sutrisno','081234567805','Jl. Senayan No. 34, Jakarta Selatan');
+
+-- Seed sample kunjungan with GPS coordinates
+INSERT INTO `kunjungan` (`fundraiser_id`,`donatur_id`,`status`,`nominal`,`catatan`,`foto`,`latitude`,`longitude`,`location_address`) VALUES
+-- Jakarta Pusat locations
+(2,1,'berhasil',2500000,'Kunjungan berhasil, donatur sangat antusias','uploads/kunjungan/sample1.jpg',-6.2088,106.8456,'Jl. Sudirman No. 123, Jakarta Pusat, DKI Jakarta'),
+(2,2,'berhasil',15000000,'Meeting dengan direktur, program disetujui','uploads/kunjungan/sample2.jpg',-6.1865,106.8243,'Jl. Thamrin No. 45, Jakarta Pusat, DKI Jakarta'),
+(2,6,'berhasil',8000000,'Presentasi program berhasil','uploads/kunjungan/sample3.jpg',-6.2088,106.8456,'Jl. Sudirman No. 456, Jakarta Pusat, DKI Jakarta'),
+(3,7,'berhasil',1200000,'Donatur tertarik dengan program pendidikan','uploads/kunjungan/sample4.jpg',-6.1865,106.8243,'Jl. Menteng Raya No. 78, Jakarta Pusat, DKI Jakarta'),
+
+-- Jakarta Selatan locations
+(3,3,'berhasil',800000,'Donatur tertarik dengan program pendidikan','uploads/kunjungan/sample5.jpg',-6.2088,106.8456,'Jl. Gatot Subroto No. 67, Jakarta Selatan, DKI Jakarta'),
+(4,4,'berhasil',5000000,'Kolaborasi program sosial','uploads/kunjungan/sample6.jpg',-6.2088,106.8456,'Jl. Rasuna Said No. 89, Jakarta Selatan, DKI Jakarta'),
+(4,5,'berhasil',1200000,'Donatur tertarik dengan program kesehatan','uploads/kunjungan/sample7.jpg',-6.2088,106.8456,'Jl. Kuningan No. 12, Jakarta Selatan, DKI Jakarta'),
+(5,8,'follow-up',0,'Perlu follow up minggu depan',NULL,-6.2088,106.8456,'Jl. Senayan No. 34, Jakarta Selatan, DKI Jakarta'),
+
+-- Additional sample data
+(5,1,'tidak-berhasil',0,'Donatur tidak ada di rumah',NULL,-6.2088,106.8456,'Jl. Sudirman No. 123, Jakarta Pusat, DKI Jakarta'),
+(6,2,'berhasil',3000000,'Kunjungan follow up berhasil','uploads/kunjungan/sample8.jpg',-6.1865,106.8243,'Jl. Thamrin No. 45, Jakarta Pusat, DKI Jakarta'),
+(6,3,'berhasil',1500000,'Donatur baru, sangat ramah','uploads/kunjungan/sample9.jpg',-6.2088,106.8456,'Jl. Gatot Subroto No. 67, Jakarta Selatan, DKI Jakarta'),
+(7,4,'follow-up',0,'Janji bertemu minggu depan',NULL,-6.2088,106.8456,'Jl. Rasuna Said No. 89, Jakarta Selatan, DKI Jakarta');
+
 -- Seed minimal settings
 INSERT INTO `settings` (`setting_key`,`setting_value`) VALUES
 ('site_name','Fundraising System'),
-('app_version','1.0.0');
+('app_version','1.0.0'),
+('company_name','PT. Fundraising Indonesia'),
+('company_address','Jl. Sudirman No. 123, Jakarta Pusat'),
+('company_phone','+62-21-1234-5678'),
+('company_email','info@fundraising.com'),
+('target_monthly','100000000'),
+('target_yearly','1200000000'),
+('currency_format','IDR');
 
 -- ========================================
 -- 6. ADDITIONAL INDEXES FOR PERFORMANCE
@@ -122,34 +170,11 @@ CREATE INDEX `idx_kunjungan_date_range` ON `kunjungan` (`created_at`, `status`);
 -- Index for user performance queries
 CREATE INDEX `idx_users_active_fundraisers` ON `users` (`role`, `status`) WHERE `role` = 'user' AND `status` = 'active';
 
--- ========================================
--- 7. SAMPLE DATA (OPTIONAL)
--- ========================================
-
--- Uncomment below to add sample data for testing
-
-/*
--- Sample fundraisers
-INSERT INTO `users` (`name`,`email`,`username`,`password`,`role`,`status`,`target`) VALUES
-('John Doe','john@example.com','john','__BCRYPT_USER1__','user','active',8),
-('Jane Smith','jane@example.com','jane','__BCRYPT_USER2__','user','active',10),
-('Monitor User','monitor@example.com','monitor','__BCRYPT_MONITOR__','monitor','active',0);
-
--- Sample donatur
-INSERT INTO `donatur` (`nama`,`hp`,`alamat`) VALUES
-('Ahmad Rizki','081234567890','Jl. Sudirman No. 123, Jakarta'),
-('Siti Nurhaliza','081234567891','Jl. Thamrin No. 456, Jakarta'),
-('Budi Santoso','081234567892','Jl. Gatot Subroto No. 789, Jakarta');
-
--- Sample kunjungan (with GPS and photo data)
-INSERT INTO `kunjungan` (`fundraiser_id`,`donatur_id`,`status`,`nominal`,`catatan`,`foto`,`latitude`,`longitude`,`location_address`) VALUES
-(2,1,'berhasil',500000,'Kunjungan berhasil, donatur sangat ramah','uploads/kunjungan/sample1.jpg',-6.2088,106.8456,'Jl. Sudirman No. 123, Jakarta Pusat'),
-(2,2,'follow-up',0,'Perlu follow up minggu depan',NULL,-6.1751,106.8650,'Jl. Thamrin No. 456, Jakarta Pusat'),
-(3,3,'tidak-berhasil',0,'Donatur tidak ada di rumah',NULL,-6.2088,106.8456,'Jl. Gatot Subroto No. 789, Jakarta Selatan');
-*/
+-- Index for GPS-based queries
+CREATE INDEX `idx_kunjungan_gps_search` ON `kunjungan` (`latitude`, `longitude`, `created_at`);
 
 -- ========================================
--- 8. VERIFICATION QUERIES
+-- 7. VERIFICATION QUERIES
 -- ========================================
 
 -- Verify table creation
