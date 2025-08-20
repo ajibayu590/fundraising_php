@@ -78,7 +78,7 @@ try {
         header('Content-Disposition: attachment; filename=' . $filename);
         
         echo "<table border='1'>";
-        echo "<tr><th>ID</th><th>Fundraiser</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Catatan</th></tr>";
+        echo "<tr><th>ID</th><th>Fundraiser</th><th>Donatur</th><th>HP Donatur</th><th>Alamat</th><th>Status</th><th>Nominal</th><th>Tanggal</th><th>Foto</th><th>Latitude</th><th>Longitude</th><th>Lokasi</th><th>Catatan</th></tr>";
         
         foreach ($kunjunganData as $row) {
             $id = htmlspecialchars($row['id']);
@@ -89,9 +89,13 @@ try {
             $status = htmlspecialchars($row['status'] ?? '');
             $nominal = $row['status'] == 'berhasil' ? number_format($row['nominal'] ?? 0, 0, ',', '.') : '-';
             $tanggal = date('d/m/Y H:i', strtotime($row['created_at']));
+            $foto = $row['foto'] ? 'Ada' : 'Tidak ada';
+            $latitude = $row['latitude'] ?? '-';
+            $longitude = $row['longitude'] ?? '-';
+            $lokasi = htmlspecialchars($row['location_address'] ?? '-');
             $catatan = htmlspecialchars($row['catatan'] ?? '');
             
-            echo "<tr><td>$id</td><td>$fundraiser</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$catatan</td></tr>";
+            echo "<tr><td>$id</td><td>$fundraiser</td><td>$donatur</td><td>$hp</td><td>$alamat</td><td>$status</td><td>$nominal</td><td>$tanggal</td><td>$foto</td><td>$latitude</td><td>$longitude</td><td>$lokasi</td><td>$catatan</td></tr>";
         }
         echo "</table>";
         exit;
@@ -329,6 +333,8 @@ try {
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nominal</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Foto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -385,6 +391,34 @@ try {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <?php echo date('d/m/Y H:i', strtotime($kunjungan['created_at'])); ?>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <?php if ($kunjungan['foto']): ?>
+                                            <a href="<?php echo htmlspecialchars($kunjungan['foto']); ?>" target="_blank" class="text-blue-600 hover:text-blue-800">
+                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Lihat Foto
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-gray-400">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <?php if ($kunjungan['latitude'] && $kunjungan['longitude']): ?>
+                                            <a href="https://maps.google.com/?q=<?php echo $kunjungan['latitude']; ?>,<?php echo $kunjungan['longitude']; ?>" target="_blank" class="text-green-600 hover:text-green-800">
+                                                <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                </svg>
+                                                Lihat Lokasi
+                                            </a>
+                                            <?php if ($kunjungan['location_address']): ?>
+                                                <br><span class="text-xs text-gray-500"><?php echo htmlspecialchars(substr($kunjungan['location_address'], 0, 30)) . (strlen($kunjungan['location_address']) > 30 ? '...' : ''); ?></span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="text-gray-400">-</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
                                         <button onclick="deleteKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-red-600 hover:text-red-900">Delete</button>
@@ -393,7 +427,7 @@ try {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
                                         Tidak ada data kunjungan ditemukan
                                     </td>
                                 </tr>

@@ -132,93 +132,40 @@ try {
     $pdo->exec("SET foreign_key_checks = 1");
     println("Dropped existing tables (if any)");
 
-    // -------- Create tables --------
-    // users
-    $pdo->exec(<<<SQL
-CREATE TABLE `users` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(150) NOT NULL,
-    `email` VARCHAR(150) DEFAULT NULL,
-    `username` VARCHAR(100) DEFAULT NULL,
-    `password` VARCHAR(255) NOT NULL,
-    `role` ENUM('admin','monitor','user') NOT NULL DEFAULT 'user',
-    `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
-    `target` INT UNSIGNED NOT NULL DEFAULT 8,
-    `phone` VARCHAR(25) DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_users_email` (`email`),
-    UNIQUE KEY `uq_users_username` (`username`),
-    KEY `idx_users_role` (`role`),
-    KEY `idx_users_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL);
+    // -------- Create tables from SQL file --------
+    $sql_file = __DIR__ . '/database_complete.sql';
+    if (!file_exists($sql_file)) {
+        throw new RuntimeException("SQL file not found: $sql_file");
+    }
+    
+    $sql_content = file_get_contents($sql_file);
+    
+    // Remove database creation and USE statements (we're already connected)
+    $sql_content = preg_replace('/CREATE DATABASE.*?;/s', '', $sql_content);
+    $sql_content = preg_replace('/USE.*?;/s', '', $sql_content);
+    
+    // Remove DROP TABLE statements (we already dropped them)
+    $sql_content = preg_replace('/DROP TABLE.*?;/s', '', $sql_content);
+    
+    // Remove verification queries
+    $sql_content = preg_replace('/-- ========================================.*$/s', '', $sql_content);
+    
+    // Split into individual statements
+    $statements = array_filter(array_map('trim', explode(';', $sql_content)));
+    
+    foreach ($statements as $statement) {
+        if (!empty($statement) && !preg_match('/^(--|SET|SELECT|SHOW)/', trim($statement))) {
+            $pdo->exec($statement);
+        }
+    }
+    
+    println("Created tables from database_complete.sql");
 
-    // donatur
-    $pdo->exec(<<<SQL
-CREATE TABLE `donatur` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `nama` VARCHAR(150) NOT NULL,
-    `hp` VARCHAR(25) NOT NULL,
-    `alamat` TEXT DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_donatur_hp` (`hp`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL);
-
-    // kunjungan
-    $pdo->exec(<<<SQL
-CREATE TABLE `kunjungan` (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `fundraiser_id` INT UNSIGNED NOT NULL,
-    `donatur_id` INT UNSIGNED NOT NULL,
-    `status` ENUM('berhasil','tidak-berhasil','follow-up') NOT NULL,
-    `nominal` BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    `catatan` TEXT DEFAULT NULL,
-    `foto` VARCHAR(255) DEFAULT NULL,
-    `latitude` DECIMAL(10,8) DEFAULT NULL,
-    `longitude` DECIMAL(11,8) DEFAULT NULL,
-    `location_address` TEXT DEFAULT NULL,
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    KEY `idx_kunjungan_fundraiser` (`fundraiser_id`),
-    KEY `idx_kunjungan_donatur` (`donatur_id`),
-    KEY `idx_kunjungan_status` (`status`),
-    KEY `idx_kunjungan_created_at` (`created_at`),
-    KEY `idx_kunjungan_foto` (`foto`),
-    KEY `idx_kunjungan_location` (`latitude`, `longitude`),
-    CONSTRAINT `fk_kunjungan_fundraiser` FOREIGN KEY (`fundraiser_id`) REFERENCES `users`(`id`) ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT `fk_kunjungan_donatur` FOREIGN KEY (`donatur_id`) REFERENCES `donatur`(`id`) ON UPDATE CASCADE ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL);
-
-    // settings
-    $pdo->exec(<<<SQL
-CREATE TABLE `settings` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `setting_key` VARCHAR(100) NOT NULL,
-    `setting_value` TEXT DEFAULT NULL,
-    `updated_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uq_settings_key` (`setting_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-SQL);
-
-    println("Created tables: users, donatur, kunjungan, settings");
-
-    // -------- Seed admin --------
+    // -------- Seed admin with provided password --------
     $adminHash = password_hash($adminPass, PASSWORD_BCRYPT);
-    $stmt = $pdo->prepare("INSERT INTO `users` (`name`,`email`,`username`,`password`,`role`,`status`,`target`) VALUES (?,?,?,?, 'admin','active', 8)");
-    $stmt->execute(['Administrator','admin@example.com','admin', $adminHash]);
-    println("Seeded admin user: username=admin");
-
-    // -------- Seed settings --------
-    $stmt = $pdo->prepare("INSERT INTO `settings` (`setting_key`,`setting_value`) VALUES (?,?), (?,?)");
-    $stmt->execute(['site_name','Fundraising System','app_version','1.0.0']);
-    println("Seeded minimal settings");
+    $stmt = $pdo->prepare("UPDATE `users` SET `password` = ? WHERE `username` = 'admin'");
+    $stmt->execute([$adminHash]);
+    println("Updated admin password: username=admin");
 
     // -------- Ensure upload directory --------
     $uploadDir = __DIR__ . '/uploads/kunjungan';
