@@ -56,6 +56,84 @@ header {
     width: 100% !important;
 }
 
+/* Header styling */
+.fixed-header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 50 !important;
+    background: white !important;
+    border-bottom: 1px solid var(--gray-200) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.header-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 0 1.5rem !important;
+    height: 64px !important;
+    max-width: 100% !important;
+}
+
+.header-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.header-title h1 {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: var(--gray-900) !important;
+    line-height: 1.2 !important;
+}
+
+.header-title p {
+    margin: 0 !important;
+    font-size: 0.875rem !important;
+    color: var(--gray-600) !important;
+    line-height: 1.2 !important;
+}
+
+.header-user-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+.welcome-text {
+    font-size: 0.875rem !important;
+    color: var(--gray-700) !important;
+}
+
+.user-role-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 0.25rem 0.75rem !important;
+    border-radius: 9999px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.logout-link {
+    font-size: 0.875rem !important;
+    color: var(--danger-color) !important;
+    text-decoration: none !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 0.375rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.logout-link:hover {
+    background: var(--danger-color) !important;
+    color: white !important;
+}
+
 /* Force sidebar positioning */
 .sidebar, aside, #sidebar {
     z-index: 20 !important;
