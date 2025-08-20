@@ -222,16 +222,7 @@ try {
                 <?php endif; ?>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="mt-8 bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
-                <div class="flex flex-wrap gap-4">
-                    <a href="dashboard.php" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Go to Normal Dashboard</a>
-                    <a href="test_api_direct.php" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Test API Direct</a>
-                    <a href="check_data.php" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">Check Database Data</a>
-                    <a href="insert_today_data.php" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700">Insert Today's Data</a>
-                </div>
-            </div>
+
         </div>
     </div>
 
