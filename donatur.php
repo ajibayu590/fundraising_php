@@ -264,9 +264,16 @@ try {
 	<header class="bg-white shadow-sm border-b">
 		<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
 			<div class="flex justify-between items-center" style="height: 64px !important;">
-							<div class="flex items-center">
-				<h1 class="text-xl md:text-2xl font-bold text-gray-900 ml-12 md:ml-0">Management Donatur</h1>
-			</div>
+							                <div class="flex items-center">
+                    <?php
+                    require_once 'logo_manager.php';
+                    echo get_logo_html('w-10 h-10', 'mr-3');
+                    ?>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">Management Donatur</h1>
+                        <p class="text-sm text-gray-600">Donor Management</p>
+                    </div>
+                </div>
 				<div class="flex items-center space-x-2 md:space-x-4">
 					<span class="text-xs md:text-sm text-gray-700 hidden sm:block">Welcome, <?php echo htmlspecialchars($user['name']); ?></span>
 					<span class="inline-flex items-center px-2 py-1 md:px-2.5 md:py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

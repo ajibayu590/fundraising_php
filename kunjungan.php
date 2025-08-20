@@ -221,7 +221,14 @@ try {
         <div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center" style="height: 64px !important;">
                 			<div class="flex items-center">
-				<h1 class="text-xl md:text-2xl font-bold text-gray-900 ml-12 md:ml-0">Management Kunjungan</h1>
+				<?php
+				require_once 'logo_manager.php';
+				echo get_logo_html('w-10 h-10', 'mr-3');
+				?>
+				<div>
+					<h1 class="text-xl md:text-2xl font-bold text-gray-900">Management Kunjungan</h1>
+					<p class="text-sm text-gray-600">Fundraising Visits</p>
+				</div>
 			</div>
                 <div class="flex items-center space-x-2 md:space-x-4">
                     <span class="text-xs md:text-sm text-gray-700 hidden sm:block">Welcome, <?php echo htmlspecialchars($user['name']); ?></span>
