@@ -365,7 +365,7 @@ $page_title = 'WhatsApp Manager';
             };
             
             try {
-                const response = await fetch('api/whatsapp.php?action=send', {
+                const response = await fetch('whatsapp_api.php?action=send_message', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -405,7 +405,7 @@ $page_title = 'WhatsApp Manager';
             };
             
             try {
-                const response = await fetch('api/whatsapp.php?action=send_bulk', {
+                const response = await fetch('whatsapp_api.php?action=send_bulk', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -430,7 +430,7 @@ $page_title = 'WhatsApp Manager';
         // Load templates
         async function loadTemplates() {
             try {
-                const response = await fetch('api/whatsapp.php?action=templates');
+                const response = await fetch('whatsapp_api.php?action=templates');
                 const result = await response.json();
                 
                 if (result.success) {

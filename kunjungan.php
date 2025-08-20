@@ -420,7 +420,8 @@ try {
                                         <?php endif; ?>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-3">Edit</button>
+                                        <button onclick="editKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-blue-600 hover:text-blue-900 mr-2">Edit</button>
+                                        <button onclick="sendWhatsAppNotification(<?php echo $kunjungan['id']; ?>)" class="text-green-600 hover:text-green-900 mr-2">📱 WhatsApp</button>
                                         <button onclick="deleteKunjungan(<?php echo $kunjungan['id']; ?>)" class="text-red-600 hover:text-red-900">Delete</button>
                                     </td>
                                 </tr>
@@ -550,6 +551,32 @@ try {
             fundraisers: <?php echo json_encode($fundraisers ?? []); ?>,
             csrfToken: '<?php echo generate_csrf_token(); ?>'
         };
+
+        // WhatsApp notification function
+        async function sendWhatsAppNotification(kunjunganId) {
+            try {
+                const response = await fetch('whatsapp_api.php?action=send_kunjungan_notification', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        kunjungan_id: kunjunganId,
+                        template_id: 'kunjungan_success'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ WhatsApp notification sent successfully!');
+                } else {
+                    alert('❌ Failed to send WhatsApp notification: ' + result.message);
+                }
+            } catch (error) {
+                alert('❌ Error sending WhatsApp notification: ' + error.message);
+            }
+        }
     </script>
 
     	<script src="js/config.js"></script>
