@@ -109,6 +109,15 @@
                 WhatsApp Settings
             </a>
 
+            <!-- WhatsApp Database Setup -->
+            <a href="setup_whatsapp_database.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                </svg>
+                WhatsApp Database Setup
+                <span class="ml-auto bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">Setup</span>
+            </a>
+
             <!-- Settings -->
             <a href="settings.php" class="sidebar-link flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-colors">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
