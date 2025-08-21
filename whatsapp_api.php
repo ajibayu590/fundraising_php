@@ -149,7 +149,11 @@ class WhatsAppAPI {
             CURLOPT_POSTFIELDS => $postData,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/x-www-form-urlencoded'
-            ]
+            ],
+            // SSL Settings to handle certificate issues
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2
         ]);
         
         $response = curl_exec($curl);
@@ -244,14 +248,14 @@ function send_whatsapp_message() {
             'message' => $input['message'],
             'file' => $input['file'] ?? null,
             'success' => $result['success'],
-            'response' => $result['response']
+            'response' => $result['response'] ?? null
         ]);
         
         if ($result['success']) {
             echo json_encode([
                 'success' => true,
                 'message' => 'Message sent successfully',
-                'data' => $result['response']
+                'data' => $result['response'] ?? null
             ]);
         } else {
             echo json_encode([
@@ -303,14 +307,14 @@ function send_template_message() {
             'template_id' => $input['template_id'],
             'variables' => json_encode($input['variables'] ?? []),
             'success' => $result['success'],
-            'response' => $result['response']
+            'response' => $result['response'] ?? null
         ]);
         
         if ($result['success']) {
             echo json_encode([
                 'success' => true,
                 'message' => 'Template message sent successfully',
-                'data' => $result['response']
+                'data' => $result['response'] ?? null
             ]);
         } else {
             echo json_encode([
@@ -375,7 +379,7 @@ function send_bulk_messages() {
                 'donor_name' => $donor['nama'],
                 'phone' => $donor['hp'],
                 'success' => $result['success'],
-                'response' => $result['response']
+                'response' => $result['response'] ?? null
             ];
             
             if ($result['success']) {
@@ -391,7 +395,7 @@ function send_bulk_messages() {
                 'message' => $input['message'],
                 'donor_id' => $donor['id'],
                 'success' => $result['success'],
-                'response' => $result['response']
+                'response' => $result['response'] ?? null
             ]);
             
             // Small delay to avoid rate limiting
@@ -505,7 +509,7 @@ function send_kunjungan_notification() {
             'template_id' => $template_id,
             'variables' => json_encode($variables),
             'success' => $result['success'],
-            'response' => $result['response']
+            'response' => $result['response'] ?? null
         ]);
         
         if ($result['success']) {
@@ -517,7 +521,7 @@ function send_kunjungan_notification() {
                     'donor_name' => $kunjungan['donor_name'],
                     'donor_phone' => $kunjungan['donor_hp'],
                     'message' => $message,
-                    'response' => $result['response']
+                    'response' => $result['response'] ?? null
                 ]
             ]);
         } else {
@@ -645,7 +649,7 @@ function test_whatsapp_connection() {
             echo json_encode([
                 'success' => true,
                 'message' => 'WhatsApp API connection successful',
-                'data' => $result['response']
+                'data' => $result['response'] ?? null
             ]);
         } else {
             echo json_encode([
@@ -677,6 +681,11 @@ function log_whatsapp_message($data) {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         
+        $responseData = $data['response'] ?? [];
+        if (is_string($responseData)) {
+            $responseData = ['raw_response' => $responseData];
+        }
+        
         $stmt->execute([
             $data['user_id'] ?? null,
             $data['donor_id'] ?? null,
@@ -686,7 +695,7 @@ function log_whatsapp_message($data) {
             $data['variables'] ?? null,
             $data['file'] ?? null,
             $data['success'] ? 1 : 0,
-            json_encode($data['response'] ?? [])
+            json_encode($responseData)
         ]);
         
     } catch (Exception $e) {
