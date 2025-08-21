@@ -1,0 +1,127 @@
+# ========================================
+# FUNDRAISING SYSTEM - GIT IGNORE
+# ========================================
+
+# Configuration Files (Sensitive Data)
+config.php
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Database Files
+*.sql
+*.sqlite
+*.db
+
+# Log Files
+logs/
+*.log
+error.log
+access.log
+
+# Upload Files (User Content)
+uploads/
+temp/
+cache/
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup Files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Session Files
+sessions/
+*.sess
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+
+# SSL Certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Composer (if using)
+vendor/
+composer.lock
+
+# Node Modules (if using)
+node_modules/
+package-lock.json
+
+# Build Files
+dist/
+build/
+
+# Test Files
+tests/
+test/
+*.test.php
+
+# Documentation (optional)
+docs/
+*.md
+!README.md
+
+# Database Dumps
+database_dumps/
+*.dump
+
+# Configuration Backups
+config_backup/
+*.config.backup
+
+# Error Pages (custom)
+error_pages/
+404.php
+500.php
+
+# Security Files
+.htaccess.backup
+robots.txt.backup
+
+# ========================================
+# ENVIRONMENT SPECIFIC
+# ========================================
+
+# Production Files
+production/
+prod/
+
+# Staging Files
+staging/
+stage/
+
+# Development Files
+dev/
+development/
+
+# ========================================
+# CUSTOM IGNORE PATTERNS
+# ========================================
+
+# Custom ignore patterns can be added here
+# Example: *.custom
+# Example: custom_folder/
