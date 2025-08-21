@@ -373,16 +373,26 @@ $page_title = 'WhatsApp Manager';
                     body: JSON.stringify(data)
                 });
                 
-                const result = await response.json();
+                const responseText = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('Invalid JSON response:', responseText);
+                    alert('Error: Invalid response from server. Please check console for details.');
+                    return;
+                }
                 
                 if (result.success) {
                     alert('Message sent successfully!');
                     closeSendMessageModal();
                     location.reload();
                 } else {
-                    alert('Failed to send message: ' + result.message);
+                    alert('Failed to send message: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
+                console.error('Network error:', error);
                 alert('Error sending message: ' + error.message);
             }
         });
@@ -413,16 +423,26 @@ $page_title = 'WhatsApp Manager';
                     body: JSON.stringify(data)
                 });
                 
-                const result = await response.json();
+                const responseText = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('Invalid JSON response:', responseText);
+                    alert('Error: Invalid response from server. Please check console for details.');
+                    return;
+                }
                 
                 if (result.success) {
                     alert(`Bulk messages sent: ${result.data.success} successful, ${result.data.errors} failed`);
                     closeBulkMessageModal();
                     location.reload();
                 } else {
-                    alert('Failed to send bulk messages: ' + result.message);
+                    alert('Failed to send bulk messages: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
+                console.error('Network error:', error);
                 alert('Error sending bulk messages: ' + error.message);
             }
         });
@@ -431,7 +451,16 @@ $page_title = 'WhatsApp Manager';
         async function loadTemplates() {
             try {
                 const response = await fetch('whatsapp_api.php?action=templates');
-                const result = await response.json();
+                const responseText = await response.text();
+                let result;
+                
+                try {
+                    result = JSON.parse(responseText);
+                } catch (jsonError) {
+                    console.error('Invalid JSON response:', responseText);
+                    alert('Error: Invalid response from server. Please check console for details.');
+                    return;
+                }
                 
                 if (result.success) {
                     let templateList = 'Available Templates:\n\n';
@@ -440,9 +469,10 @@ $page_title = 'WhatsApp Manager';
                     });
                     alert(templateList);
                 } else {
-                    alert('Failed to load templates: ' + result.message);
+                    alert('Failed to load templates: ' + (result.message || 'Unknown error'));
                 }
             } catch (error) {
+                console.error('Network error:', error);
                 alert('Error loading templates: ' + error.message);
             }
         }

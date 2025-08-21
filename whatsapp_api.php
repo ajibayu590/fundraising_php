@@ -124,7 +124,7 @@ class WhatsAppAPI {
             'authkey' => $this->auth_key,
             'to' => $this->formatPhoneNumber($to),
             'template_id' => $template_id,
-            'variables' => $variables,
+            'variables' => json_encode($variables),
             'sandbox' => $this->sandbox ? 'true' : 'false'
         ];
         
@@ -165,7 +165,23 @@ class WhatsAppAPI {
             ];
         }
         
+        // Clean response - remove any trailing commas or invalid JSON
+        $response = trim($response);
+        if (substr($response, -1) === ',') {
+            $response = rtrim($response, ',');
+        }
+        
         $responseData = json_decode($response, true);
+        
+        // Check if JSON decode failed
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [
+                'success' => false,
+                'error' => 'Invalid JSON response: ' . json_last_error_msg(),
+                'http_code' => $httpCode,
+                'raw_response' => $response
+            ];
+        }
         
         return [
             'success' => $httpCode === 200 && isset($responseData['message_status']) && $responseData['message_status'] === 'Success',
@@ -268,10 +284,16 @@ function send_template_message() {
     try {
         $whatsapp = new WhatsAppAPI();
         
+        // Convert variables to proper format if it's a string
+        $variables = $input['variables'] ?? [];
+        if (is_string($variables)) {
+            $variables = json_decode($variables, true) ?: [];
+        }
+        
         $result = $whatsapp->sendTemplateMessage(
             $input['to'],
             $input['template_id'],
-            $input['variables'] ?? []
+            $variables
         );
         
         // Log message
@@ -459,11 +481,17 @@ function send_kunjungan_notification() {
             '{hp_donatur}' => $kunjungan['donor_hp']
         ];
         
-        // Replace variables in message
-        $message = $template['message'];
-        foreach ($variables as $key => $value) {
-            $message = str_replace($key, $value, $message);
-        }
+                       // Replace variables in message
+               $message = $template['message'];
+               foreach ($variables as $key => $value) {
+                   $message = str_replace($key, $value, $message);
+               }
+               
+               // Convert variables to proper format for API
+               $api_variables = [];
+               foreach ($variables as $key => $value) {
+                   $api_variables[$key] = $value;
+               }
         
         // Send message
         $result = $whatsapp->sendTextMessage($kunjungan['donor_hp'], $message);
